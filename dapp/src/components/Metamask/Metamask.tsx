@@ -11,18 +11,19 @@ function Metamask() {
 
   const connectToMetamask = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
+    console.log('provider => ', provider)
     const accounts = await provider.send('eth_requestAccounts', [])
     const balance = await provider.getBalance(accounts[0])
     const balanceInEther = ethers.utils.formatEther(balance)
     const block = await provider.getBlockNumber()
 
-    // const daiContract = new ethers.Contract('0x6b175474e89094c44da98b954eedeac495271d0f', ERC20_ABI, provider)
-    // console.log('daiContract=>', daiContract)
-    // const tokenName = await daiContract.name()
-    // console.log('tokenName=>', tokenName)
-    // const tokenBalance = await daiContract.balanceOf(accounts[0])
-    // const tokenUnits = await daiContract.decimals()
-    // const tokenBalanceInEther = ethers.utils.formatUnits(tokenBalance, tokenUnits)
+    const daiContract = new ethers.Contract('0x3125aA646f095761B887972D1381468A41f8d32B', ERC20_ABI, provider)
+    console.log('daiContract=>', daiContract)
+    const tokenName = await daiContract.name()
+    console.log('tokenName=>', tokenName)
+    const tokenBalance = await daiContract.balanceOf(accounts[0])
+    const tokenUnits = await daiContract.decimals()
+    const tokenBalanceInEther = ethers.utils.formatUnits(tokenBalance, tokenUnits)
 
     setBlock(block)
     setAddress(accounts[0])
