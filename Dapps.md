@@ -49,3 +49,25 @@
    - connect tới ví 
    - Tạo sender từ private key và provider
    - Từ sender sendTransaction 
+5. Interacte with Contract 
+   - Yêu cầu:
+     - Cần có đồng của contract đó để gửi.
+   - Khởi tạo provider.  // const provider = new ethers.providers.Web3Provider(window.ethereum)
+   - Get Signer // const signer = provider.getSigner()
+   - Khởi tạo 1 contract // const USDTContract = new ethers.Contract(ADDRESS_CONTACT, ERC20_ABI, provider)
+   - Connect signer đến contract // const daiContractWithSigner = USDTContract.connect(signer)
+   - Và gửi tiền // daiContractWithSigner.transfer(ACCOUNT_2, tokenAmountInEther)
+6. change account in metamask
+   - use Event trong ether.
+   - Bắt được address event đó thông qua window.ether
+   - Dùng address mới để connect lại tới contract và thực thi function mong muốn.
+
+
+
+
+
+
+### Function
+- **parseUnits** để parse số tiền (number) => hệ hex
+- **formatEther** để format Ether từ hệ hex => number
+
