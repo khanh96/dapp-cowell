@@ -1,18 +1,20 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '../public/vite.svg'
-import './App.css'
+import { ToastContainer, toast } from 'react-toastify'
+import { useEffect } from 'react'
+import 'react-toastify/dist/ReactToastify.css'
 import Metamask from './components/Metamask'
+import ErrorBoundary from './components/ErrorBoundary'
+import useRouterElement from './routers/useRouterElement'
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const routeElements = useRouterElement()
   return (
-    <>
-      <div>
+    <ErrorBoundary>
+      {/* <div>
         <Metamask />
-      </div>
-    </>
+      </div> */}
+      {routeElements}
+      <ToastContainer />
+    </ErrorBoundary>
   )
 }
 

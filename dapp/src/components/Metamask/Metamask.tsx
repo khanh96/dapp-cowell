@@ -58,6 +58,7 @@ function Metamask() {
     const provider = new ethers.providers.JsonRpcProvider('https://api.sepolia.kroma.network')
     const signer = provider.getSigner()
     console.log('signer=>', signer)
+    const listAccount = await provider.listAccounts()
   }
   // send token from address A to address B
   const writeToTheBlockchain = async () => {
@@ -119,7 +120,8 @@ function Metamask() {
     const USDTContractWithSigner = USDTContract.connect(signer)
     console.log(`Số tiền còn trong ví: ${ethers.utils.formatEther(tokenBalanceOfContract)} USDT`)
     console.log(`Số tiền muốn gửi ${ethers.utils.formatEther(tokenAmountInEther)} USDT`)
-    USDTContractWithSigner.transfer(ACCOUNT_2, tokenAmountInEther)
+
+    // USDTContractWithSigner.transfer(ACCOUNT_2, tokenAmountInEther)
   }
 
   const burnToken = async () => {
