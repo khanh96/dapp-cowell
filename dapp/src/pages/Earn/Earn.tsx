@@ -1,9 +1,9 @@
-import React from 'react'
+import Wallet from 'src/components/Wallet'
 
 export default function Earn() {
   return (
     <main className='container max-w-[960px]'>
-      <h2 className='mx-auto mt-10 text-center text-3xl font-normal text-white'>Staking to Earn</h2>
+      <h2 className='mx-auto mt-10 text-center text-4xl font-normal text-white'>Staking to Earn</h2>
       <div className='mt-10'>
         <div className='rounded-xl border border-[#1e2740] '>
           <div className='flex items-center py-4 pl-4 text-left font-medium text-white'>Co-well Staking Statistics</div>
@@ -37,9 +37,7 @@ export default function Earn() {
                 <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' className='h-9 w-9' alt='logo' />
               </div>
               <div className='mt-3 text-lg uppercase text-white'>0 aidoge</div>
-              <div className='mt-3 w-full rounded-xl border border-[#17f3dd] px-6 py-3 text-center text-sm text-[#17f3dd] hover:opacity-80'>
-                Claim Rewards
-              </div>
+              <div className='btn-outline mt-3'>Claim Rewards</div>
             </div>
           </div>
         </div>

@@ -1,8 +1,17 @@
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { path } from 'src/constants/path'
+import Button from '../Button'
+import { FloatingPortal, shift, useFloating, useHover, useInteractions } from '@floating-ui/react'
+import Wallet from '../Wallet'
+import Popover from '../Popover'
+import classNames from 'classnames'
 
 export default function Header() {
+  const [activeRotateArrow, setActiveRotateArrow] = useState(false)
+  const rotateArrowUp = useCallback((isOpen: boolean) => {
+    setActiveRotateArrow(isOpen)
+  }, [])
   return (
     <header className='sticky left-0 right-0 top-0 pb-5 pt-3 text-white'>
       <div className='container'>
@@ -19,12 +28,36 @@ export default function Header() {
           <div className='hidden md:col-span-7 md:block'>menu desktop</div>
           {/* Connect wallet */}
           <div className='flex items-center justify-start'>
-            <button
-              className='rounded-xl bg-gradient-to-r from-[#33d4fa] to-[#17f3dd] px-6 py-3 text-black'
-              type='button'
-            >
+            {/* Chưa có ví thì show button  */}
+
+            {/* <Button className='btn-primary' type='button'>
               Connect Wallet
-            </button>
+            </Button> */}
+
+            {/* Đã connect vi  */}
+            <Popover renderPopover={<Wallet />} className='' rotateArrow={rotateArrowUp}>
+              <Button
+                className='btn-outline'
+                icon={
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    strokeWidth={1.5}
+                    stroke='currentColor'
+                    className={classNames('ml-2 inline-block h-4 w-4', {
+                      'rotate-180 transition-all duration-300': activeRotateArrow,
+                      'rotate-0  transition-all duration-300': !activeRotateArrow
+                    })}
+                  >
+                    <path strokeLinecap='round' strokeLinejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' />
+                  </svg>
+                }
+              >
+                0xF...045B
+              </Button>
+            </Popover>
+
             <button className='md:hidden'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'

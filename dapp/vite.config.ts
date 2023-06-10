@@ -10,7 +10,7 @@ export default defineConfig({
     port: 3000
   },
   css: {
-    devSourcemap: true
+    devSourcemap: true // Bật sourcemap để nhìn được css ở vị trí nào (https://vitejs.dev/config/shared-options.html)
   },
   resolve: {
     alias: {

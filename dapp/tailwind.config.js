@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+const _ = require('lodash')
 const plugin = require('tailwindcss/plugin')
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -9,6 +10,7 @@ export default {
   theme: {
     extend: {}
   },
+
   plugins: [
     plugin(function ({ addComponents, theme }) {
       const components = {

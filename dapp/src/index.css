@@ -13,3 +13,10 @@ body {
   font-family: HGGTZH, 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 400;
 }
+
+.btn-primary {
+  @apply rounded-xl bg-gradient-to-r from-[#33d4fa] to-[#17f3dd] px-6 py-3 text-black hover:opacity-80;
+}
+.btn-outline {
+  @apply w-full rounded-xl border border-[#17f3dd] px-6 py-3 text-center text-sm text-[#17f3dd] hover:opacity-80;
+}
