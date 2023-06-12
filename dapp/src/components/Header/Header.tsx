@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
 import classNames from 'classnames'
 import { path } from 'src/constants/path'
@@ -6,6 +6,7 @@ import Button from '../Button'
 import Popover from '../Popover'
 import Wallet from '../Wallet'
 import NavigationDesktop from '../NavigationDesktop'
+import { ModalContext } from 'src/contexts/modal.context'
 export default function Header() {
   const [activeRotateArrow, setActiveRotateArrow] = useState(false)
   const rotateArrowUp = useCallback((isOpen: boolean) => {

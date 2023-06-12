@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import App from './App.tsx'
 import './index.css'
 import { BrowserRouter } from 'react-router-dom'
+import { ModalContextProvider } from './contexts/modal.context.tsx'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,7 +19,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <ModalContextProvider>
+          <App />
+        </ModalContextProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </BrowserRouter>
