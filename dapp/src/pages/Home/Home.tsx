@@ -1,5 +1,10 @@
 import React from 'react'
+import Metamask from 'src/components/Metamask'
 
 export default function Home() {
-  return <div>Home</div>
+  return (
+    <div>
+      <Metamask />
+    </div>
+  )
 }

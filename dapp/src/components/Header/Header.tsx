@@ -1,19 +1,18 @@
 import React, { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
+import classNames from 'classnames'
 import { path } from 'src/constants/path'
 import Button from '../Button'
-import { FloatingPortal, shift, useFloating, useHover, useInteractions } from '@floating-ui/react'
-import Wallet from '../Wallet'
 import Popover from '../Popover'
-import classNames from 'classnames'
-
+import Wallet from '../Wallet'
+import NavigationDesktop from '../NavigationDesktop'
 export default function Header() {
   const [activeRotateArrow, setActiveRotateArrow] = useState(false)
   const rotateArrowUp = useCallback((isOpen: boolean) => {
     setActiveRotateArrow(isOpen)
   }, [])
   return (
-    <header className='sticky left-0 right-0 top-0 pb-5 pt-3 text-white'>
+    <header className='sticky left-0 right-0 top-0 bg-[#060818] pb-5 pt-3 text-white'>
       <div className='container'>
         <div className='flex items-center justify-between'>
           {/* LOGO */}
@@ -25,19 +24,21 @@ export default function Header() {
             />
           </Link>
           {/* MENU Desktop */}
-          <div className='hidden md:col-span-7 md:block'>menu desktop</div>
+          <div className='hidden md:block'>
+            <NavigationDesktop />
+          </div>
           {/* Connect wallet */}
           <div className='flex items-center justify-start'>
             {/* Chưa có ví thì show button  */}
 
-            {/* <Button className='btn-primary' type='button'>
+            <Button className='btn-primary' type='button'>
               Connect Wallet
-            </Button> */}
-
+            </Button>
             {/* Đã connect vi  */}
-            <Popover renderPopover={<Wallet />} className='' rotateArrow={rotateArrowUp}>
+            {/* <Popover renderPopover={<Wallet />} className='' rotateArrow={rotateArrowUp}>
               <Button
                 className='btn-outline'
+                iconPosition='end'
                 icon={
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
@@ -56,8 +57,7 @@ export default function Header() {
               >
                 0xF...045B
               </Button>
-            </Popover>
-
+            </Popover> */}
             <button className='md:hidden'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
@@ -70,6 +70,9 @@ export default function Header() {
                 <path strokeLinecap='round' strokeLinejoin='round' d='M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5' />
               </svg>
             </button>
+            {/* <FloatingPortal>
+              <NavigationMobile />
+            </FloatingPortal> */}
           </div>
         </div>
       </div>

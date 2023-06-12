@@ -201,7 +201,7 @@ function Metamask() {
   }
 
   return (
-    <div>
+    <div className='flex h-[400px] flex-col items-center justify-center text-center text-white'>
       {!address && <button onClick={() => connectToMetamask()}>Connect to Metamask</button>}
       {address && (
         <div>

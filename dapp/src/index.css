@@ -15,8 +15,12 @@ body {
 }
 
 .btn-primary {
-  @apply rounded-xl bg-gradient-to-r from-[#33d4fa] to-[#17f3dd] px-6 py-3 text-black hover:opacity-80;
+  @apply w-full  rounded-xl bg-gradient-to-r from-[#33d4fa] to-[#17f3dd] px-6 py-3 text-black hover:opacity-80;
 }
 .btn-outline {
   @apply w-full rounded-xl border border-[#17f3dd] px-6 py-3 text-center text-sm text-[#17f3dd] hover:opacity-80;
+}
+
+.nav-link {
+  @apply my-0 font-[ExtraBold] text-base font-bold transition delay-0 duration-300 ease-in hover:text-[#17f3dd]  md:mx-3 lg:mx-8;
 }
