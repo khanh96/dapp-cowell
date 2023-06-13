@@ -1,7 +1,7 @@
 import React, { Component, useEffect, useState } from 'react'
 import { BaseContract, BigNumber, ContractFunction, providers } from 'ethers/src.ts/index'
 import { ethers } from 'ethers'
-import ERC20_ABI from '../../abi/ERC20_ABI.json'
+import ERC20_ABI from '../../abi/ERC20_ABI_TOKEN.json'
 
 const ACCOUNT_1 = '0xF89568201Ac27FCF56f3350B6e00E524c8a6045B'
 const ACCOUNT_2 = '0x755915F49ee6B7108f1a9c0f968BcaE242B0C682'

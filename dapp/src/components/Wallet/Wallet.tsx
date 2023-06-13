@@ -1,7 +1,10 @@
+import { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { path } from 'src/constants/path'
+import { MetamaskContext } from 'src/contexts/metamask.context'
 
 export default function Wallet() {
+  const { userBalance, tokenSymbol } = useContext(MetamaskContext)
   return (
     <div className='relative mx-auto mt-2 w-[300px] rounded-2xl border-transparent bg-gradient-to-tl from-[#ffe96f] to-[#00e4ce] p-[2px]'>
       <div className='h-full w-full rounded-2xl bg-[#060818] p-3'>
@@ -10,7 +13,9 @@ export default function Wallet() {
             <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' alt='AIDOGE' className='h-10 w-10' />
           </div>
           <div className='mt-2 text-lg font-bold text-white'>
-            <span>0.000 AIDOGE</span>
+            <span>
+              {Number(userBalance).toFixed(4)} {tokenSymbol}
+            </span>
           </div>
           <div className='mt-2 text-xs font-bold text-[#677395]'>
             <span>$0.000</span>

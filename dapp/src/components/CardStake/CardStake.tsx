@@ -1,7 +1,15 @@
 import React from 'react'
 import Button from '../Button'
+import ModalStartStaking from '../ModalStartStaking'
+import useModal from 'src/utils/hooks/useModal'
 
 export default function CardStake() {
+  const { isModalOpen, setIsModalOpen } = useModal()
+
+  const onclickStartStaking = () => {
+    console.log('onclickStartStaking')
+    setIsModalOpen(true)
+  }
   return (
     <section>
       <div className='mt-10'>
@@ -26,7 +34,7 @@ export default function CardStake() {
                 <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' className='h-9 w-9' alt='logo' />
               </div>
               <div className='mt-3 text-lg uppercase text-white'>0 aidoge</div>
-              <Button onClick={() => console.log('Start Staking')} className='btn-primary mt-5'>
+              <Button onClick={onclickStartStaking} className='btn-primary mt-5'>
                 Start Staking
               </Button>
             </div>
@@ -42,6 +50,7 @@ export default function CardStake() {
           </div>
         </div>
       </div>
+      <ModalStartStaking isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
     </section>
   )
 }

@@ -6,12 +6,21 @@ import Button from '../Button'
 import Popover from '../Popover'
 import Wallet from '../Wallet'
 import NavigationDesktop from '../NavigationDesktop'
-import { ModalContext } from 'src/contexts/modal.context'
+import ModalConnectWallet from '../ModalConnectWallet'
+import { MetamaskContext } from 'src/contexts/metamask.context'
+import useMetamask from 'src/utils/hooks/useMetamask'
+import { formatDotAccount } from 'src/utils/utils'
 export default function Header() {
   const [activeRotateArrow, setActiveRotateArrow] = useState(false)
+  const { defaultAccount, isModalOpen, setIsModalOpen } = useMetamask()
   const rotateArrowUp = useCallback((isOpen: boolean) => {
     setActiveRotateArrow(isOpen)
   }, [])
+
+  const onClickConnectWallet = () => {
+    setIsModalOpen(true)
+  }
+
   return (
     <header className='sticky left-0 right-0 top-0 bg-[#060818] pb-5 pt-3 text-white'>
       <div className='container'>
@@ -31,34 +40,37 @@ export default function Header() {
           {/* Connect wallet */}
           <div className='flex items-center justify-start'>
             {/* Chưa có ví thì show button  */}
-
-            <Button className='btn-primary' type='button'>
-              Connect Wallet
-            </Button>
-            {/* Đã connect vi  */}
-            {/* <Popover renderPopover={<Wallet />} className='' rotateArrow={rotateArrowUp}>
-              <Button
-                className='btn-outline'
-                iconPosition='end'
-                icon={
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    strokeWidth={1.5}
-                    stroke='currentColor'
-                    className={classNames('ml-2 inline-block h-4 w-4', {
-                      'rotate-180 transition-all duration-300': activeRotateArrow,
-                      'rotate-0  transition-all duration-300': !activeRotateArrow
-                    })}
-                  >
-                    <path strokeLinecap='round' strokeLinejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' />
-                  </svg>
-                }
-              >
-                0xF...045B
+            {!defaultAccount && (
+              <Button className='btn-primary' type='button' onClick={onClickConnectWallet}>
+                Connect Wallet
               </Button>
-            </Popover> */}
+            )}
+            {Boolean(defaultAccount) && (
+              <Popover renderPopover={<Wallet />} className='' rotateArrow={rotateArrowUp}>
+                <Button
+                  className='btn-outline'
+                  iconPosition='end'
+                  icon={
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      strokeWidth={1.5}
+                      stroke='currentColor'
+                      className={classNames('ml-2 inline-block h-4 w-4', {
+                        'rotate-180 transition-all duration-300': activeRotateArrow,
+                        'rotate-0  transition-all duration-300': !activeRotateArrow
+                      })}
+                    >
+                      <path strokeLinecap='round' strokeLinejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' />
+                    </svg>
+                  }
+                >
+                  {formatDotAccount(defaultAccount)}
+                </Button>
+              </Popover>
+            )}
+            <ModalConnectWallet isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
             <button className='md:hidden'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'

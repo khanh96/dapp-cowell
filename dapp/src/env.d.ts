@@ -13,6 +13,8 @@ interface ImportMetaEnv {
   SSR: boolean
   VITE_PRIVATE_KEY_ACCOUNT_1: string
   VITE_PRIVATE_KEY_ACCOUNT_2: string
+  VITE_CONTRACT_TOKEN_COWELL: string
+  VITE_CONTRACT_STAKING: string
 }
 
 interface ImportMeta {
