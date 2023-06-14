@@ -13,7 +13,6 @@ export default function useMetamask() {
       closeModal()
     }
   }, [defaultAccount, closeModal])
-
   return {
     connectMetamask,
     isModalOpen,

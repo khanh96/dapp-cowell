@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useRef } from 'react'
 import Button from '../Button'
 import ModalStartStaking from '../ModalStartStaking'
 import useModal from 'src/utils/hooks/useModal'
@@ -6,12 +6,14 @@ import { MetamaskContext } from 'src/contexts/metamask.context'
 import useStaking from 'src/utils/hooks/useStaking'
 
 export default function CardStake() {
-  const { isModalOpen, openModal } = useStaking()
+  const funcOpenModalRef = useRef<{ callOpenModal: () => void }>({
+    callOpenModal: () => null
+  })
+  // const { isModalOpen, openModal } = useStaking()
   const { stakingBalance, tokenSymbol } = useContext(MetamaskContext)
-  console.log('isModalOpen=>', isModalOpen)
   const onclickStartStaking = () => {
     console.log('onclickStartStaking')
-    openModal()
+    funcOpenModalRef.current.callOpenModal()
   }
   return (
     <section>
@@ -55,7 +57,7 @@ export default function CardStake() {
           </div>
         </div>
       </div>
-      <ModalStartStaking />
+      <ModalStartStaking ref={funcOpenModalRef} />
     </section>
   )
 }

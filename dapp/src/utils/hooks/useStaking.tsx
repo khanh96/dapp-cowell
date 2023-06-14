@@ -8,7 +8,8 @@ import useModal from './useModal'
 
 export default function useStaking() {
   const { isModalOpen, closeModal, openModal } = useModal()
-  const { contractToken, signer, defaultAccount, contractStaking, setStakingBalance } = useContext(MetamaskContext)
+  const { contractToken, signer, defaultAccount, contractStaking, setStakingBalance, setUserBalance } =
+    useContext(MetamaskContext)
   const [isLoadingApprove, setIsLoadingApprove] = useState<boolean>(false)
   const [isLoadingStake, setIsLoadingStake] = useState<boolean>(false)
   const [isDisabledStake, setIsDisabledStake] = useState<boolean>(false)
@@ -62,15 +63,18 @@ export default function useStaking() {
             // transaction success
             const tokenBalance = await balanceOfRead(contractStaking, signer)
             console.log('result', tokenBalance)
-            // const numberAllowance = await allowanceRead(contractToken, signer)
-            // allow transfer token with numberAllowance
-            // console.log('number allow => ', numberAllowance)
             setStakingBalance(tokenBalance)
-            setIsLoadingStake(false)
+            if (contractToken) {
+              const tokenBalanceOfContract = await contractToken.balanceOf(defaultAccount)
+              setUserBalance(formatEther(tokenBalanceOfContract))
+            }
             setIsLoadingStake(false)
             closeModal()
           }
         })
+        return {
+          message: 'Stake success'
+        }
       } catch (error: any) {
         if (error.code === 'ACTION_REJECTED') {
           toast.error('user rejected transaction')
