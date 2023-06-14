@@ -1,14 +1,17 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Button from '../Button'
 import ModalStartStaking from '../ModalStartStaking'
 import useModal from 'src/utils/hooks/useModal'
+import { MetamaskContext } from 'src/contexts/metamask.context'
+import useStaking from 'src/utils/hooks/useStaking'
 
 export default function CardStake() {
-  const { isModalOpen, setIsModalOpen } = useModal()
-
+  const { isModalOpen, openModal } = useStaking()
+  const { stakingBalance, tokenSymbol } = useContext(MetamaskContext)
+  console.log('isModalOpen=>', isModalOpen)
   const onclickStartStaking = () => {
     console.log('onclickStartStaking')
-    setIsModalOpen(true)
+    openModal()
   }
   return (
     <section>
@@ -33,7 +36,9 @@ export default function CardStake() {
               <div className='mt-3 text-center text-sm font-normal text-white'>
                 <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' className='h-9 w-9' alt='logo' />
               </div>
-              <div className='mt-3 text-lg uppercase text-white'>0 aidoge</div>
+              <div className='mt-3 text-lg uppercase text-white'>
+                {stakingBalance ? stakingBalance : '0.000'} {tokenSymbol}
+              </div>
               <Button onClick={onclickStartStaking} className='btn-primary mt-5'>
                 Start Staking
               </Button>
@@ -50,7 +55,7 @@ export default function CardStake() {
           </div>
         </div>
       </div>
-      <ModalStartStaking isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+      <ModalStartStaking />
     </section>
   )
 }

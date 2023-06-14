@@ -3,21 +3,22 @@ import useModal from './useModal'
 import { MetamaskContext } from 'src/contexts/metamask.context'
 
 export default function useMetamask() {
-  const { isModalOpen, setIsModalOpen } = useModal()
+  const { isModalOpen, closeModal, openModal } = useModal()
   const { defaultAccount, connectWalletHandler } = useContext(MetamaskContext)
   const connectMetamask = () => {
     connectWalletHandler()
   }
   useEffect(() => {
     if (defaultAccount) {
-      setIsModalOpen(false)
+      closeModal()
     }
-  }, [defaultAccount, setIsModalOpen])
+  }, [defaultAccount, closeModal])
 
   return {
     connectMetamask,
     isModalOpen,
     defaultAccount,
-    setIsModalOpen
+    closeModal,
+    openModal
   }
 }

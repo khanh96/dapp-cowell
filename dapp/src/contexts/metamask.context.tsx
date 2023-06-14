@@ -1,7 +1,9 @@
 import { ethers } from 'ethers'
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { formatEther } from 'src/utils/utils'
 import ERC20_ABI_TOKEN from '../abi/ERC20_ABI_TOKEN.json'
+import ERC20_ABI_STAKING from '../abi/ERC20_ABI_STAKING.json'
+import useStaking from 'src/utils/hooks/useStaking'
 
 interface MetamaskContextInterface {
   defaultAccount: string
@@ -12,6 +14,11 @@ interface MetamaskContextInterface {
   setUserBalance: React.Dispatch<React.SetStateAction<string>>
   connectWalletHandler: () => void
   tokenSymbol: string
+  contractToken?: ethers.Contract
+  signer?: ethers.providers.JsonRpcSigner
+  contractStaking?: ethers.Contract
+  stakingBalance: string
+  setStakingBalance: React.Dispatch<React.SetStateAction<string>>
 }
 
 export const initialMetamaskContext = {
@@ -22,7 +29,9 @@ export const initialMetamaskContext = {
   userBalance: '',
   setUserBalance: () => null,
   connectWalletHandler: () => null,
-  tokenSymbol: 'CW'
+  tokenSymbol: 'CW',
+  stakingBalance: '',
+  setStakingBalance: () => null
 }
 
 export const MetamaskContext = React.createContext<MetamaskContextInterface>(initialMetamaskContext)
@@ -40,6 +49,10 @@ export const MetamaskContextProvider = ({
   const [errorMessage, setErrorMessage] = useState<string>(defaultValue.errorMessage)
   const [userBalance, setUserBalance] = useState<string>(defaultValue.userBalance)
   const [tokenSymbol, setTokenSymbol] = useState<string>(defaultValue.tokenSymbol)
+  const [contractToken, setContractToken] = useState<ethers.Contract>()
+  const [contractStaking, setContractStaking] = useState<ethers.Contract>()
+  const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>()
+  const [stakingBalance, setStakingBalance] = useState<string>(defaultValue.stakingBalance)
 
   const connectWalletHandler = () => {
     if (window.ethereum) {
@@ -57,17 +70,37 @@ export const MetamaskContextProvider = ({
       ERC20_ABI_TOKEN,
       newAccount
     )
-    const tokenSymbol = await contractTokenCowell.symbol()
-    setTokenSymbol(tokenSymbol)
-    const address = await newAccount.getAddress()
-    setDefaultAccount(address)
-    const balance = await newAccount.getBalance()
-    setUserBalance(formatEther(balance))
-    await getUserBalance(address)
+    const contractStakingCowell = new ethers.Contract(
+      import.meta.env.VITE_CONTRACT_STAKING,
+      ERC20_ABI_STAKING,
+      newAccount
+    )
+    setContractStaking(contractStakingCowell)
+    setContractToken(contractTokenCowell)
+    setSigner(newAccount)
+    try {
+      const tokenSymbol = await contractTokenCowell.symbol()
+      setTokenSymbol(tokenSymbol)
+      const address = await newAccount.getAddress() // address account metamask
+      setDefaultAccount(address)
+      const balance = await newAccount.getBalance() // native token
+      const tokenBalanceOfContract = await contractTokenCowell.balanceOf(address)
+      setUserBalance(formatEther(tokenBalanceOfContract))
+      const contractWithSigner = contractStakingCowell.connect(newAccount)
+      const stakingBalanceOfContract = await contractWithSigner.balanceOf(address)
+      setStakingBalance(formatEther(stakingBalanceOfContract))
+    } catch (error) {
+      console.log(error)
+    }
+    // const userBalance = await getUserBalance(address)
   }
-  const getUserBalance = async (address: string) => {
-    const balance = await provider.getBalance(address, 'latest')
-  }
+
+  // TODO: lam sao de
+
+  // const getUserBalance = async (address: string) => {
+  //   const balance = await provider.getBalance(address, 'latest')
+  // }
+  console.log('stakingBalance=>', stakingBalance)
 
   return (
     <MetamaskContext.Provider
@@ -79,7 +112,12 @@ export const MetamaskContextProvider = ({
         setUserBalance,
         userBalance,
         connectWalletHandler,
-        tokenSymbol
+        tokenSymbol,
+        contractToken,
+        signer,
+        contractStaking,
+        stakingBalance,
+        setStakingBalance
       }}
     >
       {children}

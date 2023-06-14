@@ -5,18 +5,18 @@ import { MetamaskContext } from 'src/contexts/metamask.context'
 import useMetamask from 'src/utils/hooks/useMetamask'
 
 interface ModalConnectWalletProps {
-  isOpen: boolean
-  setIsOpen: (value: boolean) => void
+  isOpen?: boolean
+  setIsOpen?: (value: boolean) => void
 }
 
 export default function ModalConnectWallet(props: ModalConnectWalletProps) {
-  const { connectMetamask } = useMetamask()
+  const { connectMetamask, closeModal, openModal, isModalOpen } = useMetamask()
   const { isOpen, setIsOpen } = props
   return (
     <>
       {/* Popup */}
-      {isOpen && (
-        <Modal onClose={() => setIsOpen(false)}>
+      {isModalOpen && (
+        <Modal onClose={() => closeModal()}>
           <div className='m-auto w-[600px] rounded-2xl bg-[#151b2c] px-3 py-4'>
             <div className='flex justify-end'>
               <svg
@@ -26,7 +26,7 @@ export default function ModalConnectWallet(props: ModalConnectWalletProps) {
                 strokeWidth={2.0}
                 stroke='#4c556f'
                 className='h-6 w-6 cursor-pointer'
-                onClick={() => setIsOpen(false)}
+                onClick={() => closeModal()}
               >
                 <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
               </svg>

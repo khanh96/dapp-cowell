@@ -1,7 +1,10 @@
-import { BigNumberish, ethers } from 'ethers'
+import { BigNumber, BigNumberish, ethers } from 'ethers'
 
 export const formatEther = (number: BigNumberish): string => {
   return ethers.utils.formatEther(number)
+}
+export const parseUnits = (value: string, unitName?: BigNumberish | undefined): BigNumber => {
+  return ethers.utils.parseUnits(value, unitName)
 }
 
 export const formatDotAccount = (address: string): string => {

@@ -12,13 +12,13 @@ import useMetamask from 'src/utils/hooks/useMetamask'
 import { formatDotAccount } from 'src/utils/utils'
 export default function Header() {
   const [activeRotateArrow, setActiveRotateArrow] = useState(false)
-  const { defaultAccount, isModalOpen, setIsModalOpen } = useMetamask()
+  const { defaultAccount, isModalOpen, openModal } = useMetamask()
   const rotateArrowUp = useCallback((isOpen: boolean) => {
     setActiveRotateArrow(isOpen)
   }, [])
 
   const onClickConnectWallet = () => {
-    setIsModalOpen(true)
+    openModal()
   }
 
   return (
@@ -70,7 +70,7 @@ export default function Header() {
                 </Button>
               </Popover>
             )}
-            <ModalConnectWallet isOpen={isModalOpen} setIsOpen={setIsModalOpen} />
+            <ModalConnectWallet />
             <button className='md:hidden'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
