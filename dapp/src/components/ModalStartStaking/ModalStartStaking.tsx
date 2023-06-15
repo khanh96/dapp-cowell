@@ -11,7 +11,7 @@ interface ModalStartStakingProps {
   setIsOpen?: (value: boolean) => void
 }
 
-const ModalStartStaking = forwardRef<{ callOpenModal: () => void }, ModalStartStakingProps>(
+const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => void }, ModalStartStakingProps>(
   function ModalStartStakingInner(props: ModalStartStakingProps, ref) {
     const { userBalance, tokenSymbol } = useContext(MetamaskContext)
     const {
@@ -23,12 +23,15 @@ const ModalStartStaking = forwardRef<{ callOpenModal: () => void }, ModalStartSt
       isLoadingStake,
       openModal,
       closeModal,
-      isModalOpen
+      isModalOpen,
+      getReward,
+      isLoadingClaimReward
     } = useStaking()
 
     const {
       register,
       handleSubmit,
+      setValue,
       watch,
       getValues,
       formState: { errors },
@@ -43,12 +46,11 @@ const ModalStartStaking = forwardRef<{ callOpenModal: () => void }, ModalStartSt
       ref,
       () => {
         return {
-          callOpenModal() {
-            openModal()
-          }
+          openModal,
+          getReward
         }
       },
-      [openModal]
+      [openModal, getReward]
     )
 
     const { isOpen, setIsOpen } = props
@@ -78,7 +80,12 @@ const ModalStartStaking = forwardRef<{ callOpenModal: () => void }, ModalStartSt
         }
       })
     }
-
+    const onClickGetMax = async () => {
+      const max = await checkAllowanceToken()
+      if (max) {
+        setValue('stake', String(max))
+      }
+    }
     return (
       <>
         {/* Popup */}
@@ -105,7 +112,7 @@ const ModalStartStaking = forwardRef<{ callOpenModal: () => void }, ModalStartSt
                     <div className='flex items-center justify-between'>
                       <div className='font-[Manrope-Regular] text-xs text-[#677395]'>Stake</div>
                       <div className='font-[Manrope-Regular] text-xs text-[#677395]'>
-                        Balance: {userBalance} {tokenSymbol}
+                        Balance: {Number(userBalance).toFixed(4)} {tokenSymbol}
                       </div>
                     </div>
                     <div className='mt-2 flex items-center justify-between'>
@@ -114,6 +121,7 @@ const ModalStartStaking = forwardRef<{ callOpenModal: () => void }, ModalStartSt
                         {...register('stake')}
                       />
                       <button
+                        onClick={onClickGetMax}
                         className='rounded-xl  border border-[#17f3dd] px-2 text-center text-xs text-[#17f3dd] hover:opacity-80'
                         type='button'
                       >

@@ -1,5 +1,5 @@
-import { ethers } from 'ethers'
-import React, { useContext, useEffect, useState } from 'react'
+import { BigNumber, ethers } from 'ethers'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { formatEther } from 'src/utils/utils'
 import ERC20_ABI_TOKEN from '../abi/ERC20_ABI_TOKEN.json'
 import ERC20_ABI_STAKING from '../abi/ERC20_ABI_STAKING.json'
@@ -19,6 +19,10 @@ interface MetamaskContextInterface {
   contractStaking?: ethers.Contract
   stakingBalance: string
   setStakingBalance: React.Dispatch<React.SetStateAction<string>>
+  totalSupply: string
+  setTotalSupply: React.Dispatch<React.SetStateAction<string>>
+  earnedTokens: string
+  setEarnedTokens: React.Dispatch<React.SetStateAction<string>>
 }
 
 export const initialMetamaskContext = {
@@ -31,7 +35,11 @@ export const initialMetamaskContext = {
   connectWalletHandler: () => null,
   tokenSymbol: 'CW',
   stakingBalance: '',
-  setStakingBalance: () => null
+  setStakingBalance: () => null,
+  totalSupply: '',
+  setTotalSupply: () => null,
+  earnedTokens: '',
+  setEarnedTokens: () => null
 }
 
 export const MetamaskContext = React.createContext<MetamaskContextInterface>(initialMetamaskContext)
@@ -53,6 +61,8 @@ export const MetamaskContextProvider = ({
   const [contractStaking, setContractStaking] = useState<ethers.Contract>()
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>()
   const [stakingBalance, setStakingBalance] = useState<string>(defaultValue.stakingBalance)
+  const [totalSupply, setTotalSupply] = useState<string>(defaultValue.totalSupply)
+  const [earnedTokens, setEarnedTokens] = useState<string>(defaultValue.earnedTokens)
 
   const connectWalletHandler = () => {
     if (window.ethereum) {
@@ -89,17 +99,38 @@ export const MetamaskContextProvider = ({
       const contractWithSigner = contractStakingCowell.connect(newAccount)
       const stakingBalanceOfContract = await contractWithSigner.balanceOf(address)
       setStakingBalance(formatEther(stakingBalanceOfContract))
+      // total supply (current staking)
+      const totalSupplyOfContract = await contractWithSigner.totalSupply()
+      setTotalSupply(formatEther(totalSupplyOfContract))
+      const earnedTokensOfContract = await contractWithSigner.earned(address)
+      console.log('earnedTokensOfContract', formatEther(earnedTokensOfContract))
+      setEarnedTokens(formatEther(earnedTokensOfContract))
     } catch (error) {
       console.log(error)
     }
     // const userBalance = await getUserBalance(address)
   }
+  // const getTotalSupply = useCallback(async () => {
+  //   if (contractStaking && signer) {
+  //     const contractWithSigner = contractStaking.connect(signer)
+  //     const totalSupplyOfContract = await contractWithSigner.totalSupply()
+  //     console.log('formatEther(totalSupplyOfContract),', formatEther(totalSupplyOfContract))
+  //     setTotalSupply(formatEther(totalSupplyOfContract))
+  //   }
+  // }, [signer, contractStaking])
 
-  // TODO: lam sao de
+  // useEffect(() => {
+  //   console.log('listen ', contractStaking)
+  //   // contractStaking?.filters.Withdraw
+  //   contractStaking?.on('Withdraw', (from: BigNumber, to: any, value, event) => {
+  //     console.log('listen Withdraw')
+  //     if (to.transactionHash && signer) {
+  //       console.log('call total supply')
+  //       getTotalSupply()
+  //     }
+  //   })
+  // }, [contractStaking, stakingBalance, signer, getTotalSupply])
 
-  // const getUserBalance = async (address: string) => {
-  //   const balance = await provider.getBalance(address, 'latest')
-  // }
   console.log('stakingBalance=>', stakingBalance)
 
   return (
@@ -117,7 +148,11 @@ export const MetamaskContextProvider = ({
         signer,
         contractStaking,
         stakingBalance,
-        setStakingBalance
+        setStakingBalance,
+        totalSupply,
+        setTotalSupply,
+        earnedTokens,
+        setEarnedTokens
       }}
     >
       {children}

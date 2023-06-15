@@ -7,7 +7,8 @@ import { visualizer } from 'rollup-plugin-visualizer'
 export default defineConfig({
   plugins: [react(), visualizer()],
   server: {
-    port: 3000
+    port: 3000,
+    host: true // search "yarn dev vite for ip pc"
   },
   css: {
     devSourcemap: true // Bật sourcemap để nhìn được css ở vị trí nào (https://vitejs.dev/config/shared-options.html)

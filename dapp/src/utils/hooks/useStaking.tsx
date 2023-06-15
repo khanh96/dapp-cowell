@@ -8,11 +8,13 @@ import useModal from './useModal'
 
 export default function useStaking() {
   const { isModalOpen, closeModal, openModal } = useModal()
-  const { contractToken, signer, defaultAccount, contractStaking, setStakingBalance, setUserBalance } =
+  const { contractToken, signer, defaultAccount, contractStaking, setStakingBalance, setUserBalance, setEarnedTokens } =
     useContext(MetamaskContext)
   const [isLoadingApprove, setIsLoadingApprove] = useState<boolean>(false)
   const [isLoadingStake, setIsLoadingStake] = useState<boolean>(false)
   const [isDisabledStake, setIsDisabledStake] = useState<boolean>(false)
+  const [isLoadingClaimReward, setIsLoadingClaimReward] = useState<boolean>(false)
+  const [isLoadingUnstaking, setIsLoadingUnstaking] = useState<boolean>(false)
 
   const balanceOfRead = async (contract: ethers.Contract, newAccount: ethers.providers.JsonRpcSigner) => {
     const contractWithSigner = contract.connect(newAccount)
@@ -63,11 +65,15 @@ export default function useStaking() {
             // transaction success
             const tokenBalance = await balanceOfRead(contractStaking, signer)
             console.log('result', tokenBalance)
+
             setStakingBalance(tokenBalance)
             if (contractToken) {
               const tokenBalanceOfContract = await contractToken.balanceOf(defaultAccount)
               setUserBalance(formatEther(tokenBalanceOfContract))
             }
+            const contractWithSigner = contractStaking.connect(signer)
+            const earnedTokensOfContract = await contractWithSigner.earned(defaultAccount)
+            setEarnedTokens(formatEther(earnedTokensOfContract))
             setIsLoadingStake(false)
             closeModal()
           }
@@ -79,8 +85,13 @@ export default function useStaking() {
         if (error.code === 'ACTION_REJECTED') {
           toast.error('user rejected transaction')
         }
-        console.log(error)
+        console.log('error', error)
+        if (error.code === -32603) {
+          console.log(error.message)
+        }
+
         setIsDisabledStake(false)
+        setIsLoadingStake(false)
       }
     }
   }
@@ -122,6 +133,73 @@ export default function useStaking() {
     }
   }
 
+  const getRewardWrite = async (contract: ethers.Contract, newAccount: ethers.providers.JsonRpcSigner) => {
+    const reward = await contract.connect(newAccount).getReward()
+    return reward
+  }
+
+  const getReward = async () => {
+    setIsLoadingClaimReward(true)
+    if (contractStaking && signer) {
+      try {
+        const transactionReward = await getRewardWrite(contractStaking, signer)
+        transactionReward.wait().then(async (res: any) => {
+          if (res.status === transaction.success) {
+            const contractWithSigner = contractStaking.connect(signer)
+            const earnedTokensOfContract = await contractWithSigner.earned(defaultAccount)
+            setEarnedTokens(formatEther(earnedTokensOfContract))
+            if (contractToken) {
+              const tokenBalanceOfContract = await contractToken.balanceOf(defaultAccount)
+              setUserBalance(formatEther(tokenBalanceOfContract))
+            }
+          }
+          setIsLoadingClaimReward(false)
+        })
+      } catch (error) {
+        console.log(error)
+        setIsLoadingClaimReward(false)
+      }
+    }
+  }
+
+  const withdrawWrite = async (
+    contract: ethers.Contract,
+    newAccount: ethers.providers.JsonRpcSigner,
+    amount: string
+  ) => {
+    const contractWithSigner = contract.connect(newAccount)
+    const tokenUnits = await (contractToken as ethers.Contract).decimals()
+    console.log(amount)
+    const tokenAmount = parseUnits(amount, tokenUnits)
+    const withdrawResult = await contractWithSigner.withdraw(tokenAmount)
+    return withdrawResult
+  }
+
+  const withdraw = async (amount: string) => {
+    setIsLoadingUnstaking(true)
+    if (contractStaking && signer) {
+      try {
+        const transactionWithWithdraw = await withdrawWrite(contractStaking, signer, amount)
+        transactionWithWithdraw.wait().then(async (res: any) => {
+          if (res && res.status === transaction.success) {
+            console.log('transactionWithWithdraw', res)
+            const tokenBalance = await balanceOfRead(contractStaking, signer)
+            console.log('result', tokenBalance)
+            setStakingBalance(tokenBalance)
+            if (contractToken) {
+              const tokenBalanceOfContract = await contractToken.balanceOf(defaultAccount)
+              setUserBalance(formatEther(tokenBalanceOfContract))
+            }
+            setIsLoadingUnstaking(false)
+          }
+        })
+      } catch (error) {
+        console.log(error)
+        setIsLoadingUnstaking(false)
+      }
+    }
+  }
+
   useEffect(() => {
     if (contractToken && signer) {
       allowanceRead(contractToken, signer).then((res) => {
@@ -146,6 +224,10 @@ export default function useStaking() {
     balanceOfRead,
     isModalOpen,
     openModal,
-    closeModal
+    closeModal,
+    getReward,
+    isLoadingClaimReward,
+    withdraw,
+    isLoadingUnstaking
   }
 }
