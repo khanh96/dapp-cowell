@@ -17,7 +17,7 @@ export default function NavigationDesktop() {
       >
         Home
       </NavLink>
-      <NavLink
+      {/* <NavLink
         className={({ isActive }) => {
           return classNames('nav-link', {
             'text-[#17f3dd]': isActive,
@@ -27,7 +27,7 @@ export default function NavigationDesktop() {
         to={path.lp}
       >
         LP
-      </NavLink>
+      </NavLink> */}
       <NavLink
         className={({ isActive }) => {
           return classNames('nav-link', {
@@ -61,7 +61,7 @@ export default function NavigationDesktop() {
       >
         NFT
       </NavLink>
-      <NavLink
+      {/* <NavLink
         className={({ isActive }) => {
           return classNames('nav-link', {
             'text-[#17f3dd]': isActive,
@@ -71,7 +71,7 @@ export default function NavigationDesktop() {
         to={path.aifi}
       >
         AIFI
-      </NavLink>
+      </NavLink> */}
       <NavLink
         className={({ isActive }) => {
           return classNames('nav-link', {

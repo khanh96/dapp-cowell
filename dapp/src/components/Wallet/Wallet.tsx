@@ -2,6 +2,7 @@ import { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { path } from 'src/constants/path'
 import { MetamaskContext } from 'src/contexts/metamask.context'
+import logoCoin from 'src/assets/images/logo-cw.png'
 
 export default function Wallet() {
   const { userBalance, tokenSymbol } = useContext(MetamaskContext)
@@ -10,7 +11,8 @@ export default function Wallet() {
       <div className='h-full w-full rounded-2xl bg-darkBlue p-3'>
         <div className='flex flex-col items-center'>
           <div className='mt-4 text-center'>
-            <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' alt='AIDOGE' className='h-10 w-10' />
+            {/* <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' alt='AIDOGE' className='h-10 w-10' /> */}
+            <img src={logoCoin} alt='logo' className='h-9 w-11' />
           </div>
           <div className='mt-2 text-lg font-bold text-white'>
             <span>

@@ -19,7 +19,6 @@ export default function CardStake() {
     useContext(MetamaskContext)
   const { isLoadingClaimReward, setIsOpenModalUnStaking, isOpenModalUnStaking, withdraw, isLoadingUnstaking } =
     useStaking()
-  console.log('isOpenModalUnStaking=>', isOpenModalUnStaking)
 
   const onClickStartStaking = () => {
     funcOpenModalRef.current.openModal()
@@ -68,7 +67,6 @@ export default function CardStake() {
     })
   }, [contractStaking, stakingBalance, signer, getTotalSupply])
 
-  console.log('claimReward', isDisableBtnClaimReward)
   return (
     <section>
       <div className='mt-10'>
@@ -92,8 +90,8 @@ export default function CardStake() {
             <div className='flex w-full flex-col items-center px-5 py-5 md:border-r-[1px] md:border-[#1e2740]'>
               <div className='mr-auto text-left font-[ExtraBold] text-sm text-white'>My Staking</div>
               <div className='mt-3 text-center text-sm font-normal text-white'>
-                <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' className='h-9 w-9' alt='logo' />
-                {/* <img src={logoCoin} alt='logo' className='h-9 w-11' /> */}
+                {/* <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' className='h-9 w-9' alt='logo' /> */}
+                <img src={logoCoin} alt='logo' className='h-9 w-11' />
               </div>
               <div className='mt-3 text-lg uppercase text-white'>
                 {stakingBalance ? stakingBalance : '0.000'} {tokenSymbol}
@@ -115,7 +113,8 @@ export default function CardStake() {
             <div className='flex w-full flex-col items-center px-5 py-5'>
               <div className='mr-auto text-left font-[ExtraBold] text-sm font-normal text-white'>My Rewards</div>
               <div className='mt-3 text-center text-sm font-normal text-white'>
-                <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' className='h-9 w-9' alt='logo' />
+                {/* <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' className='h-9 w-9' alt='logo' /> */}
+                <img src={logoCoin} alt='logo' className='h-9 w-11' />
               </div>
               <div className='mb-5 mt-3 text-lg uppercase text-white'>
                 {earnedTokens ? Number(earnedTokens).toFixed(2) : '0.000'} {tokenSymbol}
