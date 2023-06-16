@@ -99,10 +99,11 @@ export default function CardStake() {
                 {stakingBalance ? stakingBalance : '0.000'} {tokenSymbol}
               </div>
               <div className='mt-5 flex w-full gap-3'>
-                <Button onClick={onClickStartStaking} className='btn-primary'>
+                <Button kindButton='active' onClick={onClickStartStaking} className='btn-primary'>
                   Start Staking
                 </Button>
                 <Button
+                  kindButton='active'
                   disabled={Number(stakingBalance) <= 0}
                   onClick={onClickUnStaking}
                   className='w-full rounded-xl bg-gradient-to-bl from-[#7d33fa] to-[#175ff3] px-4 py-3 text-center text-sm font-normal text-white hover:opacity-80'
@@ -121,6 +122,7 @@ export default function CardStake() {
                 {earnedTokens ? Number(earnedTokens).toFixed(2) : '0.000'} {tokenSymbol}
               </div>
               <Button
+                kindButton={isDisableBtnClaimReward ? 'no-active' : 'active'}
                 disabled={isDisableBtnClaimReward}
                 onClick={onClickClaimReward}
                 className='btn-outline flex justify-center'

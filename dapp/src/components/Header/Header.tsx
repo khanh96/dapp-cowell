@@ -7,7 +7,6 @@ import Popover from '../Popover'
 import Wallet from '../Wallet'
 import NavigationDesktop from '../NavigationDesktop'
 import ModalConnectWallet from '../ModalConnectWallet'
-import { MetamaskContext } from 'src/contexts/metamask.context'
 import useMetamask from 'src/utils/hooks/useMetamask'
 import { formatDotAccount } from 'src/utils/utils'
 export default function Header() {
@@ -41,13 +40,14 @@ export default function Header() {
           <div className='flex items-center justify-start'>
             {/* Chưa có ví thì show button  */}
             {!defaultAccount && (
-              <Button className='btn-primary' type='button' onClick={onClickConnectWallet}>
+              <Button kindButton='active' className='btn-primary' type='button' onClick={onClickConnectWallet}>
                 Connect Wallet
               </Button>
             )}
             {Boolean(defaultAccount) && (
               <Popover renderPopover={<Wallet />} className='' rotateArrow={rotateArrowUp}>
                 <Button
+                  kindButton='active'
                   className='btn-outline'
                   iconPosition='end'
                   icon={

@@ -3,6 +3,7 @@ import Modal from '../Modal'
 import Button from '../Button'
 import { MetamaskContext } from 'src/contexts/metamask.context'
 import useMetamask from 'src/utils/hooks/useMetamask'
+import metaMarkSVG from 'src/assets/metamask.svg'
 
 interface ModalConnectWalletProps {
   closeModal: () => void
@@ -33,6 +34,7 @@ export default function ModalConnectWallet(props: ModalConnectWalletProps) {
           <div className='mt-7 grid grid-cols-2 gap-4'>
             <div className='col-span-1 w-full'>
               <Button
+                kindButton='active'
                 onClick={connectMetamask}
                 className='flex w-full items-center justify-start rounded-2xl border border-[#3c4a71] bg-[#1e2740] px-3 py-2 text-white'
                 icon={
