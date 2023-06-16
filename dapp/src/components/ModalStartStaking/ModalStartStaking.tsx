@@ -82,9 +82,7 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
     }
     const onClickGetMax = async () => {
       const max = await checkAllowanceToken()
-      if (max) {
-        setValue('stake', String(max))
-      }
+      setValue('stake', String(max))
     }
     return (
       <>
@@ -93,7 +91,7 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
           <Modal onClose={() => closeModal()}>
             <div className='relative mx-auto mt-2 w-[350px] rounded-2xl border-transparent bg-gradient-to-tl from-[#ffe96f] to-[#00e4ce] p-[2px]'>
               <form onSubmit={onSubmitStartStaking}>
-                <div className='h-full w-full rounded-2xl bg-[#060818] p-4'>
+                <div className='h-full w-full rounded-2xl bg-darkBlue p-4'>
                   <div className='flex justify-end'>
                     <svg
                       xmlns='http://www.w3.org/2000/svg'

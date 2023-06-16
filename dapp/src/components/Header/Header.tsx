@@ -22,7 +22,7 @@ export default function Header() {
   }
 
   return (
-    <header className='sticky left-0 right-0 top-0 bg-[#060818] pb-5 pt-3 text-white'>
+    <header className='sticky left-0 right-0 top-0 bg-darkBlue pb-5 pt-3 text-white'>
       <div className='container'>
         <div className='flex items-center justify-between'>
           {/* LOGO */}

@@ -7,12 +7,14 @@ import useStaking from 'src/utils/hooks/useStaking'
 
 interface ModalUnStaking {
   closeModalUnStaking: () => void
+  withdraw: (amount: string) => Promise<void>
+  isLoadingUnstaking: boolean
 }
 
 export default function ModalUnStaking(props: ModalUnStaking) {
-  const { closeModalUnStaking } = props
+  const { closeModalUnStaking, withdraw, isLoadingUnstaking } = props
   const { stakingBalance, tokenSymbol } = useContext(MetamaskContext)
-  const { withdraw, isLoadingUnstaking } = useStaking()
+  // const { withdraw, isLoadingUnstaking } = useStaking()
 
   const {
     register,
@@ -28,8 +30,8 @@ export default function ModalUnStaking(props: ModalUnStaking) {
     }
   })
 
-  const onSubmitUnStaking = handleSubmit((data) => {
-    const res = withdraw(data.amount)
+  const onSubmitUnStaking = handleSubmit(async (data) => {
+    const res = await withdraw(data.amount)
     console.log(res)
     console.log('onSubmitStartStaking', data)
   })
@@ -39,7 +41,7 @@ export default function ModalUnStaking(props: ModalUnStaking) {
       <Modal onClose={() => closeModalUnStaking()}>
         <div className='relative mx-auto mt-2 w-[350px] rounded-2xl border-transparent bg-gradient-to-tl from-[#ffe96f] to-[#00e4ce] p-[2px]'>
           <form onSubmit={onSubmitUnStaking}>
-            <div className='h-full w-full rounded-2xl bg-[#060818] p-4'>
+            <div className='h-full w-full rounded-2xl bg-darkBlue p-4'>
               <div className='flex justify-end'>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'

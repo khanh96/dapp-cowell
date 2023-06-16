@@ -3,8 +3,9 @@ import Metamask from 'src/components/Metamask'
 
 export default function Home() {
   return (
-    <div>
-      <Metamask />
+    <div className='mx-auto h-full text-center text-white'>
+      Home
+      {/* <Metamask /> */}
     </div>
   )
 }

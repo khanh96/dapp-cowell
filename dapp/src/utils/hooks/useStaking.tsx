@@ -15,6 +15,7 @@ export default function useStaking() {
   const [isDisabledStake, setIsDisabledStake] = useState<boolean>(false)
   const [isLoadingClaimReward, setIsLoadingClaimReward] = useState<boolean>(false)
   const [isLoadingUnstaking, setIsLoadingUnstaking] = useState<boolean>(false)
+  const [isOpenModalUnStaking, setIsOpenModalUnStaking] = useState(false)
 
   const balanceOfRead = async (contract: ethers.Contract, newAccount: ethers.providers.JsonRpcSigner) => {
     const contractWithSigner = contract.connect(newAccount)
@@ -191,6 +192,9 @@ export default function useStaking() {
               setUserBalance(formatEther(tokenBalanceOfContract))
             }
             setIsLoadingUnstaking(false)
+            setIsOpenModalUnStaking(false)
+            console.log('zzzzzz')
+            return res
           }
         })
       } catch (error) {
@@ -228,6 +232,8 @@ export default function useStaking() {
     getReward,
     isLoadingClaimReward,
     withdraw,
-    isLoadingUnstaking
+    isLoadingUnstaking,
+    isOpenModalUnStaking,
+    setIsOpenModalUnStaking
   }
 }

@@ -7,7 +7,7 @@ export default function Wallet() {
   const { userBalance, tokenSymbol } = useContext(MetamaskContext)
   return (
     <div className='relative mx-auto mt-2 w-[300px] rounded-2xl border-transparent bg-gradient-to-tl from-[#ffe96f] to-[#00e4ce] p-[2px]'>
-      <div className='h-full w-full rounded-2xl bg-[#060818] p-3'>
+      <div className='h-full w-full rounded-2xl bg-darkBlue p-3'>
         <div className='flex flex-col items-center'>
           <div className='mt-4 text-center'>
             <img src='https://arbdoge.ai/images/tokens/AIDOGE.svg' alt='AIDOGE' className='h-10 w-10' />
