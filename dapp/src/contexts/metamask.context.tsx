@@ -4,6 +4,16 @@ import { formatEther } from 'src/utils/utils'
 import ERC20_ABI_TOKEN from '../abi/ERC20_ABI_TOKEN.json'
 import ERC20_ABI_STAKING from '../abi/ERC20_ABI_STAKING.json'
 import useStaking from 'src/utils/hooks/useStaking'
+import detectEthereumProvider from '@metamask/detect-provider'
+import {
+  ContractStaking,
+  ContractToken,
+  readBalanceOfContract,
+  readEarnedToken,
+  readStakingBalanceOfContract,
+  readTokenSymbol,
+  readTotalSupply
+} from 'src/abi/common.abi'
 
 interface MetamaskContextInterface {
   defaultAccount: string
@@ -12,7 +22,6 @@ interface MetamaskContextInterface {
   setErrorMessage: React.Dispatch<React.SetStateAction<string>>
   userBalance: string
   setUserBalance: React.Dispatch<React.SetStateAction<string>>
-  connectWalletHandler: () => void
   tokenSymbol: string
   contractToken?: ethers.Contract
   signer?: ethers.providers.JsonRpcSigner
@@ -23,35 +32,65 @@ interface MetamaskContextInterface {
   setTotalSupply: React.Dispatch<React.SetStateAction<string>>
   earnedTokens: string
   setEarnedTokens: React.Dispatch<React.SetStateAction<string>>
+  disconnectWallet: () => void
 }
 
-export const initialMetamaskContext = {
+interface WalletState {
+  accounts: any[]
+  balance: string
+  chainId: string
+}
+
+interface MetaMaskContextData {
+  wallet: WalletState
+  setWallet: React.Dispatch<React.SetStateAction<WalletState>>
+  hasProvider: boolean | null
+  error: boolean
+  errorMessage: string
+  isConnecting: boolean
+  connectMetaMask: () => void
+  clearError: () => void
+}
+
+const initialWalletState = {
+  accounts: [],
+  balance: '',
+  chainId: ''
+}
+
+export const initialMetamaskContext: MetaMaskContextData & MetamaskContextInterface = {
   defaultAccount: '',
   setDefaultAccount: () => null,
   errorMessage: '',
   setErrorMessage: () => null,
   userBalance: '',
   setUserBalance: () => null,
-  connectWalletHandler: () => null,
   tokenSymbol: 'CW',
   stakingBalance: '',
   setStakingBalance: () => null,
   totalSupply: '',
   setTotalSupply: () => null,
   earnedTokens: '',
-  setEarnedTokens: () => null
+  setEarnedTokens: () => null,
+  wallet: initialWalletState,
+  setWallet: () => null,
+  hasProvider: false || null,
+  isConnecting: false,
+  connectMetaMask: () => null,
+  clearError: () => null,
+  disconnectWallet: () => null
 }
 
-export const MetamaskContext = React.createContext<MetamaskContextInterface>(initialMetamaskContext)
+export const disconnectedState: WalletState = { accounts: [], balance: '', chainId: '' }
 
-const provider = new ethers.providers.Web3Provider(window.ethereum)
+export const MetamaskContext = React.createContext<MetaMaskContextData & MetamaskContextInterface>({})
 
 export const MetamaskContextProvider = ({
   children,
   defaultValue = initialMetamaskContext
 }: {
   children: React.ReactNode
-  defaultValue?: MetamaskContextInterface
+  defaultValue?: MetamaskContextInterface & MetaMaskContextData
 }) => {
   const [defaultAccount, setDefaultAccount] = useState<string>(defaultValue.defaultAccount)
   const [errorMessage, setErrorMessage] = useState<string>(defaultValue.errorMessage)
@@ -64,72 +103,137 @@ export const MetamaskContextProvider = ({
   const [totalSupply, setTotalSupply] = useState<string>(defaultValue.totalSupply)
   const [earnedTokens, setEarnedTokens] = useState<string>(defaultValue.earnedTokens)
 
-  const connectWalletHandler = () => {
-    if (window.ethereum) {
-      provider.send('eth_requestAccounts', []).then(async () => {
-        await accountChangedHandler(provider.getSigner())
+  const [hasProvider, setHasProvider] = useState<boolean | null>(null)
+  const [isConnecting, setIsConnecting] = useState(defaultValue.isConnecting)
+  const [wallet, setWallet] = useState(disconnectedState)
+  const clearError = () => setErrorMessage('')
+
+  const _updateWallet = useCallback(async (providedAccounts?: any) => {
+    const accounts = providedAccounts || (await window.ethereum.request({ method: 'eth_accounts' }))
+    if (accounts.length === 0) {
+      // If there are no accounts, then the user is disconnected
+      setWallet(disconnectedState)
+      return
+    }
+    // native token
+    const balance = formatEther(
+      await window.ethereum.request({
+        method: 'eth_getBalance',
+        params: [accounts[0], 'latest']
       })
-    } else {
-      setErrorMessage('Please Install Metamask!!!')
-    }
-  }
+    )
+    const chainId = await window.ethereum.request({
+      method: 'eth_chainId'
+    })
 
-  const accountChangedHandler = async (newAccount: ethers.providers.JsonRpcSigner) => {
-    const contractTokenCowell = new ethers.Contract(
-      import.meta.env.VITE_CONTRACT_TOKEN_COWELL,
-      ERC20_ABI_TOKEN,
-      newAccount
-    )
-    const contractStakingCowell = new ethers.Contract(
-      import.meta.env.VITE_CONTRACT_STAKING,
-      ERC20_ABI_STAKING,
-      newAccount
-    )
-    setContractStaking(contractStakingCowell)
-    setContractToken(contractTokenCowell)
-    setSigner(newAccount)
+    // have connected with wallet=accounts and network=chainId
+
+    setWallet({ accounts, balance, chainId })
+  }, [])
+
+  const updateWalletAndAccounts = useCallback(() => _updateWallet(), [_updateWallet])
+  const updateWallet = useCallback(
+    (accounts: any) => {
+      console.log('aaaa')
+      _updateWallet(accounts)
+    },
+    [_updateWallet]
+  )
+
+  useEffect(() => {
+    const getProvider = async () => {
+      const provider = await detectEthereumProvider({ silent: true })
+      setHasProvider(Boolean(provider))
+
+      if (provider) {
+        updateWalletAndAccounts()
+        window.ethereum.on('accountsChanged', updateWallet)
+        window.ethereum.on('chainChanged', updateWalletAndAccounts)
+      }
+    }
+    getProvider()
+    return () => {
+      window.ethereum?.removeListener('accountsChanged', updateWallet)
+      window.ethereum?.removeListener('chainChanged', updateWalletAndAccounts)
+    }
+  }, [updateWallet, updateWalletAndAccounts])
+
+  const connectMetaMask = async () => {
+    setIsConnecting(true)
     try {
-      const tokenSymbol = await contractTokenCowell.symbol()
-      setTokenSymbol(tokenSymbol)
-      const address = await newAccount.getAddress() // address account metamask
-      setDefaultAccount(address)
-      const balance = await newAccount.getBalance() // native token
-      const tokenBalanceOfContract = await contractTokenCowell.balanceOf(address)
-      setUserBalance(formatEther(tokenBalanceOfContract))
-      const contractWithSigner = contractStakingCowell.connect(newAccount)
-      const stakingBalanceOfContract = await contractWithSigner.balanceOf(address)
-      setStakingBalance(formatEther(stakingBalanceOfContract))
-      // total supply (current staking)
-      const totalSupplyOfContract = await contractWithSigner.totalSupply()
-      setTotalSupply(formatEther(totalSupplyOfContract))
-      const earnedTokensOfContract = await contractWithSigner.earned(address)
-      console.log('earnedTokensOfContract', formatEther(earnedTokensOfContract))
-      setEarnedTokens(formatEther(earnedTokensOfContract))
-    } catch (error) {
-      console.log(error)
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts'
+      })
+      clearError()
+      updateWallet(accounts)
+    } catch (err: any) {
+      setErrorMessage(err.message)
     }
-    // const userBalance = await getUserBalance(address)
+    setIsConnecting(false)
   }
-  // const getTotalSupply = useCallback(async () => {
-  //   if (contractStaking && signer) {
-  //     const contractWithSigner = contractStaking.connect(signer)
-  //     const totalSupplyOfContract = await contractWithSigner.totalSupply()
-  //     console.log('formatEther(totalSupplyOfContract),', formatEther(totalSupplyOfContract))
-  //     setTotalSupply(formatEther(totalSupplyOfContract))
-  //   }
-  // }, [signer, contractStaking])
 
-  // useEffect(() => {
-  //   console.log('listen ', contractStaking)
-  //   // contractStaking?.filters.Withdraw
-  //   contractStaking?.on('Withdraw', (from: BigNumber, to: any, value, event) => {
-  //     console.log('listen Withdraw')
-  //     if (to.transactionHash && signer) {
-  //       console.log('call total supply')
-  //       getTotalSupply()
-  //     }
-  //   })
-  // }, [contractStaking, stakingBalance, signer, getTotalSupply])
+  const accountChangedHandler = useCallback(
+    async (newAccount: ethers.providers.JsonRpcSigner) => {
+      const contractTokenCowell = new ethers.Contract(
+        import.meta.env.VITE_CONTRACT_TOKEN_COWELL,
+        ERC20_ABI_TOKEN,
+        newAccount
+      ) as ContractToken
+      const contractStakingCowell = new ethers.Contract(
+        import.meta.env.VITE_CONTRACT_STAKING,
+        ERC20_ABI_STAKING,
+        newAccount
+      ) as ContractStaking
+      const contractStakingWithSigner = contractStakingCowell.connect(newAccount)
+      setContractToken(contractTokenCowell)
+      setContractStaking(contractStakingWithSigner)
+      try {
+        const tokenSymbol = await readTokenSymbol(contractTokenCowell)
+        const tokenBalanceOfContract = await readBalanceOfContract(
+          contractTokenCowell as ContractToken,
+          wallet.accounts[0]
+        )
+        const stakingBalanceOfContract = await readStakingBalanceOfContract(contractStakingCowell, wallet.accounts[0])
+        const totalSupplyOfContract = await readTotalSupply(contractStakingCowell)
+        const earnedTokensOfContract = await readEarnedToken(contractStakingCowell, wallet.accounts[0])
+        setTokenSymbol(tokenSymbol)
+        setUserBalance(tokenBalanceOfContract)
+        setStakingBalance(stakingBalanceOfContract)
+        // total supply (current staking)
+        setTotalSupply(totalSupplyOfContract)
+        setEarnedTokens(earnedTokensOfContract)
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    [wallet]
+  )
+
+  const clearAccount = useCallback(async () => {
+    setWallet(disconnectedState)
+    // const account = await window.ethereum.request({
+    //   method: 'eth_requestAccounts',
+    //   params: [
+    //     {
+    //       eth_accounts: {}
+    //     }
+    //   ]
+    // })
+    // console.log('aaaa', account)
+  }, [])
+
+  const disconnectWallet = useCallback(() => {
+    clearAccount()
+  }, [clearAccount])
+
+  useEffect(() => {
+    if (wallet.accounts[0]) {
+      const web3Provider = new ethers.providers.Web3Provider(window.ethereum)
+      web3Provider.send('eth_requestAccounts', []).then(async () => {
+        await accountChangedHandler(web3Provider.getSigner())
+      })
+    }
+  }, [wallet.accounts, accountChangedHandler])
 
   console.log('stakingBalance=>', stakingBalance)
 
@@ -142,7 +246,6 @@ export const MetamaskContextProvider = ({
         setErrorMessage,
         setUserBalance,
         userBalance,
-        connectWalletHandler,
         tokenSymbol,
         contractToken,
         signer,
@@ -152,7 +255,14 @@ export const MetamaskContextProvider = ({
         totalSupply,
         setTotalSupply,
         earnedTokens,
-        setEarnedTokens
+        setEarnedTokens,
+        // ---new
+        connectMetaMask,
+        wallet,
+        hasProvider,
+        isConnecting,
+        clearError,
+        disconnectWallet
       }}
     >
       {children}

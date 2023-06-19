@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import classNames from 'classnames'
 import { path } from 'src/constants/path'
@@ -9,12 +9,20 @@ import NavigationDesktop from '../NavigationDesktop'
 import ModalConnectWallet from '../ModalConnectWallet'
 import useMetamask from 'src/utils/hooks/useMetamask'
 import { formatDotAccount } from 'src/utils/utils'
+import useModal from 'src/utils/hooks/useModal'
 export default function Header() {
   const [activeRotateArrow, setActiveRotateArrow] = useState(false)
-  const { defaultAccount, isModalOpen, openModal, closeModal, connectMetamask } = useMetamask()
+  const { isModalOpen, closeModal, openModal } = useModal()
+  const { hasProvider, wallet, isConnecting } = useMetamask()
   const rotateArrowUp = useCallback((isOpen: boolean) => {
     setActiveRotateArrow(isOpen)
   }, [])
+
+  useEffect(() => {
+    if (wallet.accounts[0]) {
+      closeModal()
+    }
+  }, [wallet.accounts, closeModal])
 
   const onClickConnectWallet = () => {
     openModal()
@@ -39,12 +47,18 @@ export default function Header() {
           {/* Connect wallet */}
           <div className='flex items-center justify-start'>
             {/* Chưa có ví thì show button  */}
-            {!defaultAccount && (
-              <Button kindButton='active' className='btn-primary' type='button' onClick={onClickConnectWallet}>
+            {wallet.accounts.length <= 0 && (
+              <Button
+                kindButton='active'
+                className='btn-primary'
+                type='button'
+                onClick={onClickConnectWallet}
+                disabled={isConnecting}
+              >
                 Connect Wallet
               </Button>
             )}
-            {Boolean(defaultAccount) && (
+            {hasProvider && wallet.accounts.length > 0 && (
               <Popover renderPopover={<Wallet />} className='' rotateArrow={rotateArrowUp}>
                 <Button
                   kindButton='active'
@@ -66,11 +80,11 @@ export default function Header() {
                     </svg>
                   }
                 >
-                  {formatDotAccount(defaultAccount)}
+                  {formatDotAccount(wallet.accounts[0])}
                 </Button>
               </Popover>
             )}
-            {isModalOpen && <ModalConnectWallet closeModal={closeModal} connectMetamask={connectMetamask} />}
+            {isModalOpen && <ModalConnectWallet closeModal={closeModal} />}
             <button className='md:hidden'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
