@@ -1,9 +1,9 @@
-import React, { useContext } from 'react'
 import Modal from '../Modal'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import Button from '../Button'
-import { MetamaskContext } from 'src/contexts/metamask.context'
-import useStaking from 'src/utils/hooks/useStaking'
+import InputNumber from '../InputNumber'
+import { validAmountSchema } from 'src/utils/rules'
+import useMetamask from 'src/utils/hooks/useMetamask'
 
 interface ModalUnStaking {
   closeModalUnStaking: () => void
@@ -11,30 +11,51 @@ interface ModalUnStaking {
   isLoadingUnstaking: boolean
 }
 
+type FormData = {
+  amount: string
+}
+
 export default function ModalUnStaking(props: ModalUnStaking) {
   const { closeModalUnStaking, withdraw, isLoadingUnstaking } = props
-  const { stakingBalance, tokenSymbol } = useContext(MetamaskContext)
-  // const { withdraw, isLoadingUnstaking } = useStaking()
+  const { stakingBalance, tokenSymbol } = useMetamask()
 
   const {
-    register,
     handleSubmit,
-    setValue,
-    watch,
-    getValues,
     formState: { errors },
-    reset
-  } = useForm({
+    control
+  } = useForm<FormData>({
     defaultValues: {
       amount: '0'
+    },
+    shouldFocusError: false, // off tự động focus để tự handle focus
+    resolver: async (data) => {
+      try {
+        await validAmountSchema.validate(data, {
+          context: {
+            maxStake: stakingBalance
+          },
+          abortEarly: false
+        })
+        return { values: data, errors: {} }
+      } catch (validationErrors: any) {
+        const errors = validationErrors.inner.reduce((acc, { path, message }) => {
+          return {
+            ...acc,
+            [path]: {
+              message: message
+            }
+          }
+        }, {})
+        return { values: {}, errors }
+      }
     }
   })
 
   const onSubmitUnStaking = handleSubmit(async (data) => {
-    const res = await withdraw(data.amount)
-    console.log(res)
-    console.log('onSubmitStartStaking', data)
+    withdraw(data.amount)
   })
+
+  console.log('errors=>', errors.amount)
 
   return (
     <>
@@ -64,17 +85,40 @@ export default function ModalUnStaking(props: ModalUnStaking) {
                   </div>
                 </div>
                 <div className='mt-2 flex items-center justify-between'>
-                  <input
+                  {/* <input
                     className='w-full bg-[#1e2740]  text-left text-lg font-semibold text-white outline-none'
                     {...register('amount')}
+                  /> */}
+                  <Controller
+                    control={control}
+                    name='amount'
+                    render={({ field, formState, fieldState }) => (
+                      <InputNumber
+                        classNameInput='w-full bg-[#1e2740]  text-left text-lg font-semibold text-white outline-none placeholder:text-[#677395] placeholder:text-sm'
+                        classNameWrap=''
+                        type='text'
+                        placeholder='enter amount token'
+                        onChange={(event) => {
+                          field.onChange(event)
+                        }}
+                        value={field.value}
+                        name={field.name}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                        classNameError='hidden'
+                      />
+                    )}
                   />
                 </div>
               </div>
+              <div className='my-1 min-h-[1.25rem] text-left text-sm font-normal text-[#ff0000]'>
+                {errors.amount?.message}
+              </div>
               <div className='mt-4 flex gap-2'>
                 <Button
-                  kindButton='active'
+                  kindButton={errors.amount?.message ? 'no-active' : 'active'}
                   className='btn-primary flex justify-center'
-                  disabled={isLoadingUnstaking}
+                  disabled={isLoadingUnstaking || Boolean(errors.amount?.message)}
                   type='submit'
                   isLoading={isLoadingUnstaking}
                   iconLoading={

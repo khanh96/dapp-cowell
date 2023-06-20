@@ -23,9 +23,9 @@ interface MetamaskContextInterface {
   userBalance: string
   setUserBalance: React.Dispatch<React.SetStateAction<string>>
   tokenSymbol: string
-  contractToken?: ethers.Contract
+  contractToken?: ethers.Contract & ContractToken
   signer?: ethers.providers.JsonRpcSigner
-  contractStaking?: ethers.Contract
+  contractStaking?: ethers.Contract & ContractStaking
   stakingBalance: string
   setStakingBalance: React.Dispatch<React.SetStateAction<string>>
   totalSupply: string
@@ -96,8 +96,8 @@ export const MetamaskContextProvider = ({
   const [errorMessage, setErrorMessage] = useState<string>(defaultValue.errorMessage)
   const [userBalance, setUserBalance] = useState<string>(defaultValue.userBalance)
   const [tokenSymbol, setTokenSymbol] = useState<string>(defaultValue.tokenSymbol)
-  const [contractToken, setContractToken] = useState<ethers.Contract>()
-  const [contractStaking, setContractStaking] = useState<ethers.Contract>()
+  const [contractToken, setContractToken] = useState<ethers.Contract & ContractToken>()
+  const [contractStaking, setContractStaking] = useState<ethers.Contract & ContractStaking>()
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>()
   const [stakingBalance, setStakingBalance] = useState<string>(defaultValue.stakingBalance)
   const [totalSupply, setTotalSupply] = useState<string>(defaultValue.totalSupply)

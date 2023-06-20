@@ -1,7 +1,5 @@
-import React, { useContext } from 'react'
 import Modal from '../Modal'
 import Button from '../Button'
-import { MetamaskContext } from 'src/contexts/metamask.context'
 import useMetamask from 'src/utils/hooks/useMetamask'
 import metaMarkSVG from 'src/assets/metamask.svg'
 
@@ -12,7 +10,6 @@ interface ModalConnectWalletProps {
 
 export default function ModalConnectWallet(props: ModalConnectWalletProps) {
   const { connectMetaMask } = useMetamask()
-  console.log('ModalConnectWallet')
   const { closeModal } = props
   return (
     <>

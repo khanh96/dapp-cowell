@@ -4,9 +4,9 @@ import { disconnectedState } from 'src/contexts/metamask.context'
 import useMetamask from 'src/utils/hooks/useMetamask'
 
 export default function Wallet() {
-  const { userBalance, tokenSymbol, disconnectWallet } = useMetamask()
+  const { userBalance, tokenSymbol, disconnectWallet, wallet } = useMetamask()
 
-  const onClickDisconectWallet = async () => {
+  const onClickDisconnectWallet = async () => {
     disconnectWallet()
   }
   return (
@@ -22,7 +22,7 @@ export default function Wallet() {
             </span>
           </div>
           <div className='mt-2 text-xs font-bold text-[#677395]'>
-            <span>$0.000</span>
+            <span>{Number(wallet.balance).toFixed(4)} ETH</span>
           </div>
           <Link
             to={path.home}
@@ -37,7 +37,7 @@ export default function Wallet() {
             My NFT (0)
           </Link>
           <button
-            onClick={onClickDisconectWallet}
+            onClick={onClickDisconnectWallet}
             className='mt-3 w-full rounded-xl bg-[#1e2740] px-4 py-3 text-center text-sm font-normal  text-white hover:opacity-80'
           >
             Disconnect

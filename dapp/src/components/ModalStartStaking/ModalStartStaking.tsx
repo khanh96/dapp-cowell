@@ -1,19 +1,23 @@
-import React, { forwardRef, useCallback, useContext, useImperativeHandle, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import React, { forwardRef, useImperativeHandle } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import Modal from '../Modal'
 import useMetamask from 'src/utils/hooks/useMetamask'
 import Button from '../Button'
-import { MetamaskContext } from 'src/contexts/metamask.context'
 import useStaking from 'src/utils/hooks/useStaking'
+import InputNumber from '../InputNumber'
 
 interface ModalStartStakingProps {
   isOpen?: boolean
   setIsOpen?: (value: boolean) => void
 }
 
+type FormData = {
+  stake: string
+}
+
 const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => void }, ModalStartStakingProps>(
   function ModalStartStakingInner(props: ModalStartStakingProps, ref) {
-    const { userBalance, tokenSymbol } = useContext(MetamaskContext)
+    const { userBalance, tokenSymbol } = useMetamask()
     const {
       checkAllowanceToken,
       approveStaking,
@@ -35,11 +39,13 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
       watch,
       getValues,
       formState: { errors },
-      reset
-    } = useForm({
+      reset,
+      control
+    } = useForm<FormData>({
       defaultValues: {
         stake: '0'
-      }
+      },
+      shouldFocusError: false // off tự động focus để tự handle focus
     })
 
     useImperativeHandle(
@@ -55,20 +61,10 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
 
     const { isOpen, setIsOpen } = props
 
-    const onSubmitStartStaking = handleSubmit((data) => {
-      const res = approveStaking(data.stake)
+    const onSubmitStartStaking = handleSubmit(async (data) => {
+      const res = await approveStaking(data.stake)
       console.log(res)
     })
-
-    // const isDisabled = useMemo(async () => {
-    //   const allow = await checkAllowanceToken()
-    //   console.log('allow=>', allow)
-    //   if (allow && allow <= 0) {
-    //     setIsDisabledStake(true)
-    //   } else{
-    //     setIsDisabledStake(false)
-    //   }
-    // }, [checkAllowanceToken])
 
     const handleClickStake = () => {
       console.log('handleClickStake')
@@ -82,7 +78,9 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
     }
     const onClickGetMax = async () => {
       const max = await checkAllowanceToken()
-      setValue('stake', String(max))
+      if (max !== 0) {
+        setValue('stake', String(max))
+      }
     }
     return (
       <>
@@ -114,10 +112,30 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
                       </div>
                     </div>
                     <div className='mt-2 flex items-center justify-between'>
-                      <input
+                      {/* <input
                         className='w-full bg-[#1e2740]  text-left text-lg font-semibold text-white outline-none'
                         {...register('stake')}
+                      /> */}
+                      <Controller
+                        control={control}
+                        name='stake'
+                        render={({ field, formState, fieldState }) => (
+                          <InputNumber
+                            classNameInput='w-full bg-[#1e2740]  text-left text-lg font-semibold text-white outline-none placeholder:text-[#677395] placeholder:text-sm'
+                            classNameWrap=''
+                            type='text'
+                            placeholder='enter amount token'
+                            onChange={(event) => {
+                              field.onChange(event)
+                            }}
+                            value={field.value}
+                            name={field.name}
+                            ref={field.ref}
+                            onBlur={field.onBlur}
+                          />
+                        )}
                       />
+
                       <button
                         onClick={onClickGetMax}
                         className='rounded-xl  border border-[#17f3dd] px-2 text-center text-xs text-[#17f3dd] hover:opacity-80'
