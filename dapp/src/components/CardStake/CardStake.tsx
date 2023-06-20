@@ -1,22 +1,19 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import Button from '../Button'
 import ModalStartStaking from '../ModalStartStaking'
-import useModal from 'src/utils/hooks/useModal'
-import { MetamaskContext } from 'src/contexts/metamask.context'
 import useStaking from 'src/utils/hooks/useStaking'
 import ModalUnStaking from '../ModalUnstaking/ModalUnstaking'
-import { formatEther } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
-import logoCoin from 'src/assets/images/logo-cw.png'
+
+import useMetamask from 'src/utils/hooks/useMetamask'
+import { readTotalSupply } from 'src/abi/common.abi'
 
 export default function CardStake() {
   const funcOpenModalRef = useRef<{ openModal: () => void; getReward: () => void }>({
     openModal: () => null,
     getReward: () => null
   })
-  // const { isModalOpen, openModal } = useStaking()
-  const { stakingBalance, tokenSymbol, totalSupply, earnedTokens, contractStaking, signer, setTotalSupply } =
-    useContext(MetamaskContext)
+  const { stakingBalance, tokenSymbol, totalSupply, earnedTokens, contractStaking, setTotalSupply } = useMetamask()
   const { isLoadingClaimReward, setIsOpenModalUnStaking, isOpenModalUnStaking, withdraw, isLoadingUnstaking } =
     useStaking()
 
@@ -25,7 +22,6 @@ export default function CardStake() {
   }
 
   const onClickUnStaking = () => {
-    console.log('onClickUnStaking')
     setIsOpenModalUnStaking(true)
   }
 
@@ -42,30 +38,28 @@ export default function CardStake() {
   }, [earnedTokens])
 
   const getTotalSupply = useCallback(async () => {
-    if (contractStaking && signer) {
-      const contractWithSigner = contractStaking.connect(signer)
-      const totalSupplyOfContract = await contractWithSigner.totalSupply()
-      console.log('formatEther(totalSupplyOfContract),', formatEther(totalSupplyOfContract))
-      setTotalSupply(formatEther(totalSupplyOfContract))
+    if (contractStaking) {
+      const totalSupplyOfContract = await readTotalSupply(contractStaking)
+      setTotalSupply(totalSupplyOfContract)
     }
-  }, [signer, contractStaking, setTotalSupply])
+  }, [contractStaking, setTotalSupply])
 
   useEffect(() => {
     //from: BigNumber, to: any, value, event
     contractStaking?.on('Withdraw', (from: BigNumber, to: any, value, event) => {
       console.log('listen Withdraw')
-      if (to.transactionHash && signer) {
+      if (to.transactionHash) {
         console.log('call total supply')
         getTotalSupply()
       }
     })
     contractStaking?.on('Stake', (from: BigNumber, to: any, value, event) => {
       console.log('listen Stake')
-      if (to.transactionHash && signer) {
+      if (to.transactionHash) {
         getTotalSupply()
       }
     })
-  }, [contractStaking, stakingBalance, signer, getTotalSupply])
+  }, [contractStaking, stakingBalance, getTotalSupply])
 
   return (
     <section>
@@ -97,10 +91,11 @@ export default function CardStake() {
                 {stakingBalance ? stakingBalance : '0.000'} {tokenSymbol}
               </div>
               <div className='mt-5 flex w-full gap-3'>
-                <Button onClick={onClickStartStaking} className='btn-primary'>
+                <Button kindButton='active' onClick={onClickStartStaking} className='btn-primary'>
                   Start Staking
                 </Button>
                 <Button
+                  kindButton='active'
                   disabled={Number(stakingBalance) <= 0}
                   onClick={onClickUnStaking}
                   className='w-full rounded-xl bg-gradient-to-bl from-[#7d33fa] to-[#175ff3] px-4 py-3 text-center text-sm font-normal text-white hover:opacity-80'
@@ -120,6 +115,7 @@ export default function CardStake() {
                 {earnedTokens ? Number(earnedTokens).toFixed(2) : '0.000'} {tokenSymbol}
               </div>
               <Button
+                kindButton={isDisableBtnClaimReward ? 'no-active' : 'active'}
                 disabled={isDisableBtnClaimReward}
                 onClick={onClickClaimReward}
                 className='btn-outline flex justify-center'

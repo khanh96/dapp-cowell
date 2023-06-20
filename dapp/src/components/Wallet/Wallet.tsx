@@ -1,11 +1,14 @@
-import { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { path } from 'src/constants/path'
-import { MetamaskContext } from 'src/contexts/metamask.context'
 import logoCoin from 'src/assets/images/logo-cw.png'
+import useMetamask from 'src/utils/hooks/useMetamask'
 
 export default function Wallet() {
-  const { userBalance, tokenSymbol } = useContext(MetamaskContext)
+  const { userBalance, tokenSymbol, disconnectWallet, wallet } = useMetamask()
+
+  const onClickDisconnectWallet = async () => {
+    disconnectWallet()
+  }
   return (
     <div className='relative mx-auto mt-2 w-[300px] rounded-2xl border-transparent bg-gradient-to-tl from-[#ffe96f] to-[#00e4ce] p-[2px]'>
       <div className='h-full w-full rounded-2xl bg-darkBlue p-3'>
@@ -20,7 +23,7 @@ export default function Wallet() {
             </span>
           </div>
           <div className='mt-2 text-xs font-bold text-[#677395]'>
-            <span>$0.000</span>
+            <span>{Number(wallet.balance).toFixed(4)} ETH</span>
           </div>
           <Link
             to={path.home}
@@ -34,7 +37,10 @@ export default function Wallet() {
           >
             My NFT (0)
           </Link>
-          <button className='mt-3 w-full rounded-xl bg-[#1e2740] px-4 py-3 text-center text-sm font-normal  text-white hover:opacity-80'>
+          <button
+            onClick={onClickDisconnectWallet}
+            className='mt-3 w-full rounded-xl bg-[#1e2740] px-4 py-3 text-center text-sm font-normal  text-white hover:opacity-80'
+          >
             Disconnect
           </button>
         </div>

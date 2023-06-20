@@ -3,21 +3,10 @@ import useModal from './useModal'
 import { MetamaskContext } from 'src/contexts/metamask.context'
 
 export default function useMetamask() {
-  const { isModalOpen, closeModal, openModal } = useModal()
-  const { defaultAccount, connectWalletHandler } = useContext(MetamaskContext)
-  const connectMetamask = () => {
-    connectWalletHandler()
+  const contextMetamask = useContext(MetamaskContext)
+  if (contextMetamask === undefined) {
+    throw new Error('useMetaMask must be used within a "MetaMaskContextProvider"')
   }
-  useEffect(() => {
-    if (defaultAccount) {
-      closeModal()
-    }
-  }, [defaultAccount, closeModal])
-  return {
-    connectMetamask,
-    isModalOpen,
-    defaultAccount,
-    closeModal,
-    openModal
-  }
+
+  return contextMetamask
 }

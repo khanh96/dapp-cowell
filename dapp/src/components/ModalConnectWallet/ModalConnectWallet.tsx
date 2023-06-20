@@ -1,17 +1,16 @@
-import React, { useContext } from 'react'
 import Modal from '../Modal'
 import Button from '../Button'
-import { MetamaskContext } from 'src/contexts/metamask.context'
 import useMetamask from 'src/utils/hooks/useMetamask'
+import metaMarkSVG from 'src/assets/metamask.svg'
 
 interface ModalConnectWalletProps {
   closeModal: () => void
-  connectMetamask: () => void
+  // connectMetamask: () => void
 }
 
 export default function ModalConnectWallet(props: ModalConnectWalletProps) {
-  // const { connectMetamask, closeModal, isModalOpen } = useMetamask()
-  const { closeModal, connectMetamask } = props
+  const { connectMetaMask } = useMetamask()
+  const { closeModal } = props
   return (
     <>
       <Modal onClose={closeModal}>
@@ -33,7 +32,8 @@ export default function ModalConnectWallet(props: ModalConnectWalletProps) {
           <div className='mt-7 grid grid-cols-2 gap-4'>
             <div className='col-span-1 w-full'>
               <Button
-                onClick={connectMetamask}
+                kindButton='active'
+                onClick={connectMetaMask}
                 className='flex w-full items-center justify-start rounded-2xl border border-[#3c4a71] bg-[#1e2740] px-3 py-2 text-white'
                 icon={
                   <svg viewBox='0 0 40 40' color='text' xmlns='http://www.w3.org/2000/svg' className='w-8'>
