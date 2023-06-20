@@ -17,7 +17,8 @@ import useMetamask from './useMetamask'
 
 export default function useStaking() {
   const { isModalOpen, closeModal, openModal } = useModal()
-  const { wallet, contractToken, contractStaking, setStakingBalance, setUserBalance, setEarnedTokens } = useMetamask()
+  const { wallet, contractToken, contractStaking, stakingBalance, setStakingBalance, setUserBalance, setEarnedTokens } =
+    useMetamask()
   const [isLoadingApprove, setIsLoadingApprove] = useState<boolean>(false)
   const [isLoadingStake, setIsLoadingStake] = useState<boolean>(false)
   const [isDisabledStake, setIsDisabledStake] = useState<boolean>(false)
@@ -147,6 +148,7 @@ export default function useStaking() {
   useEffect(() => {
     if (contractToken) {
       readAllowance(contractToken, wallet.accounts[0]).then((res) => {
+        console.log('aaaaaa', res)
         if (Number(res) <= 0) {
           setIsDisabledStake(true)
         } else {
@@ -154,7 +156,7 @@ export default function useStaking() {
         }
       })
     }
-  }, [contractToken, wallet.accounts])
+  }, [contractToken, wallet.accounts, stakingBalance])
 
   return {
     checkAllowanceToken,

@@ -10,15 +10,23 @@ function testAmountMax(this: yup.TestContext<yup.AnyObject>) {
   return amount !== '' || maxStake !== ''
 }
 
-function testAllowanceStake(this: yup.TestContext<yup.AnyObject>) {
-  const { stake } = this.parent as { stake: string }
-  const { stakeAllow } = this.options.context as { stakeAllow: string }
-  console.log('stakeAllow', stakeAllow)
-  console.log('stake', stake)
-  if (stake !== '' && stakeAllow !== '') {
-    return Number(stakeAllow) >= Number(stake)
+// function testAllowanceStake(this: yup.TestContext<yup.AnyObject>): boolean {
+//   const { stake } = this.parent as { stake: string }
+//   const { stakeAllow } = this.options.context as { stakeAllow: string }
+//   console.log('stakeAllow', stakeAllow)
+//   console.log('stake', stake)
+//   if (stake !== '' && stakeAllow !== '') {
+//     return Number(stakeAllow) >= Number(stake)
+//   }
+//   return stake !== '' || stakeAllow !== ''
+// }
+
+const testAllowanceStake = (value: string, ctx: yup.TestContext<yup.AnyObject>) => {
+  const { stakeAllow } = ctx.options.context as { stakeAllow: string }
+  if (Number(value) > Number(stakeAllow)) {
+    return ctx.createError({ message: `Vui lòng điền stake nhỏ hơn ${stakeAllow}` })
   }
-  return stake !== '' || stakeAllow !== ''
+  return true
 }
 
 export const stakingSchema = yup.object({
@@ -27,18 +35,11 @@ export const stakingSchema = yup.object({
     message: 'Vui lòng điền khoảng stake phù hợp',
     test: testAmountMax
   }),
-  stake: yup
-    .string()
-    .required('Stake is required')
-    .test((value, { options }) => {
-      const { stakeAllow } = options.context as { stakeAllow: string }
-      console.log('allow', stakeAllow)
-      return {
-        name: 'amount-not-allowed',
-        message: `Vui lòng điền stake nho hơn ${stakeAllow}`,
-        test: testAllowanceStake
-      }
-    })
+  stake: yup.string().required('Stake is required').test({
+    name: 'stakeAllow',
+    skipAbsent: true,
+    test: testAllowanceStake
+  })
 })
 
 export const validAmountSchema = stakingSchema.pick(['amount'])

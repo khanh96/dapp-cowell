@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle } from 'react'
+import React, { forwardRef, useEffect, useImperativeHandle } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import Modal from '../Modal'
 import useMetamask from 'src/utils/hooks/useMetamask'
@@ -36,44 +36,6 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
       isLoadingClaimReward
     } = useStaking()
 
-    // const {
-    //   handleSubmit,
-    //   setValue,
-    //   getValues,
-    //   formState: { errors },
-    //   reset,
-    //   watch,
-    //   control
-    // } = useForm<FormData>({
-    //   defaultValues: {
-    //     stake: '0'
-    //   },
-    //   shouldFocusError: false, // off tự động focus để tự handle focus
-    //   resolver: async (data) => {
-    //     const a = await readAllowance(contractToken as Contract & AbiContractToken, wallet.accounts[0])
-    //     console.log(data)
-    //     try {
-    //       await validStakeSchema.validate(data, {
-    //         context: {
-    //           stakeAllow: a
-    //         },
-    //         abortEarly: false
-    //       })
-    //       return { values: data, errors: {} }
-    //     } catch (validationErrors: any) {
-    //       const errors = validationErrors.inner.reduce((acc, { path, message }) => {
-    //         return {
-    //           ...acc,
-    //           [path]: {
-    //             message: message
-    //           }
-    //         }
-    //       }, {})
-    //       return { values: {}, errors }
-    //     }
-    //   }
-    // })
-
     const {
       handleSubmit,
       formState: { errors },
@@ -91,7 +53,7 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
         try {
           await validStakeSchema.validate(data, {
             context: {
-              stakeAllow: '100'
+              stakeAllow: await checkAllowanceToken()
             },
             abortEarly: false
           })
@@ -109,9 +71,6 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
         }
       }
     })
-
-    const watchField = watch('stake')
-    console.log(watchField)
     useImperativeHandle(
       ref,
       () => {
@@ -125,36 +84,44 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
 
     const { isOpen, setIsOpen } = props
 
-    const onSubmitStartStaking = handleSubmit(async (data) => {
-      // const res = await approveStaking(data.stake)
-      console.log(data)
-    })
-
-    const handleClickStake = () => {
-      console.log('handleClickStake')
+    const onSubmitStartStaking = async () => {
       const values = getValues().stake
       console.log(values)
-      // stake(values).then((res: any) => {
-      //   console.log('res=>', res)
-      //   if (res.message === 'Stake success') {
-      //     reset()
-      //   }
-      // })
+      const res = await approveStaking(values)
+      console.log(res)
     }
+
+    const handleClickStake = handleSubmit((data) => {
+      // console.log('handleClickStake')
+      // const values = getValues().stake
+      // console.log(values)
+      stake(data.stake).then((res: any) => {
+        console.log('res=>', res)
+        if (res.message === 'Stake success') {
+          reset()
+        }
+      })
+    })
     const onClickGetMax = async () => {
       const max = await checkAllowanceToken()
       if (max !== 0) {
         setValue('stake', String(max))
       }
     }
-    console.log('errors', errors)
+    useEffect(() => {
+      checkAllowanceToken().then((res) => {
+        if (res) {
+          setValue('stake', String(res))
+        }
+      })
+    }, [])
     return (
       <>
         {/* Popup */}
         {isModalOpen && (
           <Modal onClose={() => closeModal()}>
             <div className='relative mx-auto mt-2 w-[350px] rounded-2xl border-transparent bg-gradient-to-tl from-[#ffe96f] to-[#00e4ce] p-[2px]'>
-              <form onSubmit={onSubmitStartStaking}>
+              <form onSubmit={handleClickStake}>
                 <div className='h-full w-full rounded-2xl bg-darkBlue p-4'>
                   <div className='flex justify-end'>
                     <svg
@@ -211,8 +178,9 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
                       </button>
                     </div>
                   </div>
+
                   <div className='my-1 min-h-[1.25rem] text-left text-sm font-normal text-[#ff0000]'>
-                    {errors.stake?.message}
+                    {!isDisabledStake ? errors.stake?.message : ''}
                   </div>
                   <div className='mt-4 flex gap-2'>
                     <Button
@@ -231,12 +199,13 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
                         </svg>
                       }
                       className='btn-outline flex justify-center'
-                      type='submit'
+                      onClick={onSubmitStartStaking}
+                      type='button'
                     >
                       Approve
                     </Button>
                     <Button
-                      kindButton={isDisabledStake ? 'no-active' : 'active'}
+                      kindButton={isDisabledStake || errors.stake?.message ? 'no-active' : 'active'}
                       className='btn-primary flex justify-center'
                       disabled={isLoadingStake}
                       isLoading={isLoadingStake}
