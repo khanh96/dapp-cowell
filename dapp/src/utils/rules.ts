@@ -14,6 +14,7 @@ function testAllowanceStake(this: yup.TestContext<yup.AnyObject>) {
   const { stake } = this.parent as { stake: string }
   const { stakeAllow } = this.options.context as { stakeAllow: string }
   console.log('stakeAllow', stakeAllow)
+  console.log('stake', stake)
   if (stake !== '' && stakeAllow !== '') {
     return Number(stakeAllow) >= Number(stake)
   }
@@ -26,7 +27,18 @@ export const stakingSchema = yup.object({
     message: 'Vui lòng điền khoảng stake phù hợp',
     test: testAmountMax
   }),
-  stake: yup.string().required('Stake is required')
+  stake: yup
+    .string()
+    .required('Stake is required')
+    .test((value, { options }) => {
+      const { stakeAllow } = options.context as { stakeAllow: string }
+      console.log('allow', stakeAllow)
+      return {
+        name: 'amount-not-allowed',
+        message: `Vui lòng điền stake nho hơn ${stakeAllow}`,
+        test: testAllowanceStake
+      }
+    })
 })
 
 export const validAmountSchema = stakingSchema.pick(['amount'])

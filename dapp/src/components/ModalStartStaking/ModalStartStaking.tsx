@@ -87,7 +87,27 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
         stake: '0'
       },
       shouldFocusError: false, // off tự động focus để tự handle focus
-      resolver: yupResolver(validStakeSchema)
+      resolver: async (data) => {
+        try {
+          await validStakeSchema.validate(data, {
+            context: {
+              stakeAllow: '100'
+            },
+            abortEarly: false
+          })
+          return { values: data, errors: {} }
+        } catch (validationErrors: any) {
+          const errors = validationErrors.inner.reduce((acc, { path, message }) => {
+            return {
+              ...acc,
+              [path]: {
+                message: message
+              }
+            }
+          }, {})
+          return { values: {}, errors }
+        }
+      }
     })
 
     const watchField = watch('stake')
@@ -232,7 +252,7 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
                         </svg>
                       }
                       onClick={handleClickStake}
-                      type='button'
+                      type='submit'
                     >
                       Stake
                     </Button>
