@@ -5,11 +5,19 @@ function testAmountMax(this: yup.TestContext<yup.AnyObject>) {
   const { maxStake } = this.options.context as { maxStake: string }
 
   if (amount !== '' && maxStake !== '') {
-    console.log('maxStake=>', maxStake)
-    console.log('aaa=>', Number(maxStake) >= Number(amount))
     return Number(maxStake) >= Number(amount)
   }
   return amount !== '' || maxStake !== ''
+}
+
+function testAllowanceStake(this: yup.TestContext<yup.AnyObject>) {
+  const { stake } = this.parent as { stake: string }
+  const { stakeAllow } = this.options.context as { stakeAllow: string }
+  console.log('stakeAllow', stakeAllow)
+  if (stake !== '' && stakeAllow !== '') {
+    return Number(stakeAllow) >= Number(stake)
+  }
+  return stake !== '' || stakeAllow !== ''
 }
 
 export const stakingSchema = yup.object({
@@ -17,8 +25,12 @@ export const stakingSchema = yup.object({
     name: 'amount-not-allowed',
     message: 'Vui lòng điền khoảng stake phù hợp',
     test: testAmountMax
-  })
+  }),
+  stake: yup.string().required('Stake is required')
 })
 
 export const validAmountSchema = stakingSchema.pick(['amount'])
 export type ValidAmountSchemaType = yup.InferType<typeof validAmountSchema>
+
+export const validStakeSchema = stakingSchema.pick(['stake'])
+export type ValidStakeSchemaType = yup.InferType<typeof validStakeSchema>

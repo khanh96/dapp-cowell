@@ -5,7 +5,7 @@ export interface TransactionData {
   status: number
 }
 
-interface AbiContractToken {
+export interface AbiContractToken {
   symbol: () => Promise<string>
   balanceOf: (address: string) => Promise<string>
   allowance: (owner: string, spender: string) => Promise<string>
@@ -13,7 +13,7 @@ interface AbiContractToken {
   approve: (spender: string, amount: ethers.BigNumber) => Promise<ContractTransaction>
 }
 
-interface AbiContractStacking {
+export interface AbiContractStacking {
   balanceOf: (address: string) => Promise<string>
   totalSupply: () => Promise<string>
   earned: (address: string) => Promise<string>

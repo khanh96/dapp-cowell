@@ -1,9 +1,8 @@
-import { BigNumber, ethers } from 'ethers'
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { ethers } from 'ethers'
+import React, { useCallback, useEffect, useState } from 'react'
 import { formatEther } from 'src/utils/utils'
 import ERC20_ABI_TOKEN from '../abi/ERC20_ABI_TOKEN.json'
 import ERC20_ABI_STAKING from '../abi/ERC20_ABI_STAKING.json'
-import useStaking from 'src/utils/hooks/useStaking'
 import detectEthereumProvider from '@metamask/detect-provider'
 import {
   ContractStaking,
@@ -16,16 +15,14 @@ import {
 } from 'src/abi/common.abi'
 
 interface MetamaskContextInterface {
-  defaultAccount: string
-  setDefaultAccount: React.Dispatch<React.SetStateAction<string>>
   errorMessage: string
   setErrorMessage: React.Dispatch<React.SetStateAction<string>>
   userBalance: string
   setUserBalance: React.Dispatch<React.SetStateAction<string>>
   tokenSymbol: string
-  contractToken?: ethers.Contract & ContractToken
-  signer?: ethers.providers.JsonRpcSigner
-  contractStaking?: ethers.Contract & ContractStaking
+  contractToken: (ethers.Contract & ContractToken) | null
+  contractStaking: (ethers.Contract & ContractStaking) | null
+  // setContractStaking: React.Dispatch<React.SetStateAction<ethers.Contract & ContractStaking>>
   stakingBalance: string
   setStakingBalance: React.Dispatch<React.SetStateAction<string>>
   totalSupply: string
@@ -43,9 +40,7 @@ interface WalletState {
 
 interface MetaMaskContextData {
   wallet: WalletState
-  setWallet: React.Dispatch<React.SetStateAction<WalletState>>
   hasProvider: boolean | null
-  error: boolean
   errorMessage: string
   isConnecting: boolean
   connectMetaMask: () => void
@@ -59,8 +54,6 @@ const initialWalletState = {
 }
 
 export const initialMetamaskContext: MetaMaskContextData & MetamaskContextInterface = {
-  defaultAccount: '',
-  setDefaultAccount: () => null,
   errorMessage: '',
   setErrorMessage: () => null,
   userBalance: '',
@@ -73,12 +66,13 @@ export const initialMetamaskContext: MetaMaskContextData & MetamaskContextInterf
   earnedTokens: '',
   setEarnedTokens: () => null,
   wallet: initialWalletState,
-  setWallet: () => null,
   hasProvider: false || null,
   isConnecting: false,
   connectMetaMask: () => null,
   clearError: () => null,
-  disconnectWallet: () => null
+  disconnectWallet: () => null,
+  contractToken: null,
+  contractStaking: null
 }
 
 export const disconnectedState: WalletState = { accounts: [], balance: '', chainId: '' }
@@ -92,13 +86,15 @@ export const MetamaskContextProvider = ({
   children: React.ReactNode
   defaultValue?: MetamaskContextInterface & MetaMaskContextData
 }) => {
-  const [defaultAccount, setDefaultAccount] = useState<string>(defaultValue.defaultAccount)
   const [errorMessage, setErrorMessage] = useState<string>(defaultValue.errorMessage)
   const [userBalance, setUserBalance] = useState<string>(defaultValue.userBalance)
   const [tokenSymbol, setTokenSymbol] = useState<string>(defaultValue.tokenSymbol)
-  const [contractToken, setContractToken] = useState<ethers.Contract & ContractToken>()
-  const [contractStaking, setContractStaking] = useState<ethers.Contract & ContractStaking>()
-  const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>()
+  const [contractToken, setContractToken] = useState<(ethers.Contract & ContractToken) | null>(
+    defaultValue.contractToken
+  )
+  const [contractStaking, setContractStaking] = useState<(ethers.Contract & ContractStaking) | null>(
+    defaultValue.contractStaking
+  )
   const [stakingBalance, setStakingBalance] = useState<string>(defaultValue.stakingBalance)
   const [totalSupply, setTotalSupply] = useState<string>(defaultValue.totalSupply)
   const [earnedTokens, setEarnedTokens] = useState<string>(defaultValue.earnedTokens)
@@ -184,7 +180,7 @@ export const MetamaskContextProvider = ({
         ERC20_ABI_STAKING,
         newAccount
       ) as ContractStaking
-      const contractStakingWithSigner = contractStakingCowell.connect(newAccount)
+      const contractStakingWithSigner = contractStakingCowell.connect(newAccount) as ContractStaking
       setContractToken(contractTokenCowell)
       setContractStaking(contractStakingWithSigner)
       try {
@@ -240,15 +236,12 @@ export const MetamaskContextProvider = ({
   return (
     <MetamaskContext.Provider
       value={{
-        defaultAccount,
-        setDefaultAccount,
         errorMessage,
         setErrorMessage,
         setUserBalance,
         userBalance,
         tokenSymbol,
         contractToken,
-        signer,
         contractStaking,
         stakingBalance,
         setStakingBalance,

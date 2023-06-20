@@ -7,6 +7,7 @@ import { BigNumber } from 'ethers'
 
 import useMetamask from 'src/utils/hooks/useMetamask'
 import { readTotalSupply } from 'src/abi/common.abi'
+import logoCoin from 'src/assets/images/logo-cw.png'
 
 export default function CardStake() {
   const funcOpenModalRef = useRef<{ openModal: () => void; getReward: () => void }>({

@@ -5,6 +5,10 @@ import useMetamask from 'src/utils/hooks/useMetamask'
 import Button from '../Button'
 import useStaking from 'src/utils/hooks/useStaking'
 import InputNumber from '../InputNumber'
+import { validStakeSchema } from 'src/utils/rules'
+import { AbiContractToken, readAllowance } from 'src/abi/common.abi'
+import type { Contract } from 'ethers'
+import { yupResolver } from '@hookform/resolvers/yup'
 
 interface ModalStartStakingProps {
   isOpen?: boolean
@@ -17,7 +21,7 @@ type FormData = {
 
 const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => void }, ModalStartStakingProps>(
   function ModalStartStakingInner(props: ModalStartStakingProps, ref) {
-    const { userBalance, tokenSymbol } = useMetamask()
+    const { userBalance, tokenSymbol, contractToken, wallet } = useMetamask()
     const {
       checkAllowanceToken,
       approveStaking,
@@ -32,22 +36,62 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
       isLoadingClaimReward
     } = useStaking()
 
+    // const {
+    //   handleSubmit,
+    //   setValue,
+    //   getValues,
+    //   formState: { errors },
+    //   reset,
+    //   watch,
+    //   control
+    // } = useForm<FormData>({
+    //   defaultValues: {
+    //     stake: '0'
+    //   },
+    //   shouldFocusError: false, // off tự động focus để tự handle focus
+    //   resolver: async (data) => {
+    //     const a = await readAllowance(contractToken as Contract & AbiContractToken, wallet.accounts[0])
+    //     console.log(data)
+    //     try {
+    //       await validStakeSchema.validate(data, {
+    //         context: {
+    //           stakeAllow: a
+    //         },
+    //         abortEarly: false
+    //       })
+    //       return { values: data, errors: {} }
+    //     } catch (validationErrors: any) {
+    //       const errors = validationErrors.inner.reduce((acc, { path, message }) => {
+    //         return {
+    //           ...acc,
+    //           [path]: {
+    //             message: message
+    //           }
+    //         }
+    //       }, {})
+    //       return { values: {}, errors }
+    //     }
+    //   }
+    // })
+
     const {
-      register,
       handleSubmit,
-      setValue,
-      watch,
-      getValues,
       formState: { errors },
+      control,
+      getValues,
       reset,
-      control
+      setValue,
+      watch
     } = useForm<FormData>({
       defaultValues: {
         stake: '0'
       },
-      shouldFocusError: false // off tự động focus để tự handle focus
+      shouldFocusError: false, // off tự động focus để tự handle focus
+      resolver: yupResolver(validStakeSchema)
     })
 
+    const watchField = watch('stake')
+    console.log(watchField)
     useImperativeHandle(
       ref,
       () => {
@@ -62,19 +106,20 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
     const { isOpen, setIsOpen } = props
 
     const onSubmitStartStaking = handleSubmit(async (data) => {
-      const res = await approveStaking(data.stake)
-      console.log(res)
+      // const res = await approveStaking(data.stake)
+      console.log(data)
     })
 
     const handleClickStake = () => {
       console.log('handleClickStake')
       const values = getValues().stake
-      stake(values).then((res: any) => {
-        console.log('res=>', res)
-        if (res.message === 'Stake success') {
-          reset()
-        }
-      })
+      console.log(values)
+      // stake(values).then((res: any) => {
+      //   console.log('res=>', res)
+      //   if (res.message === 'Stake success') {
+      //     reset()
+      //   }
+      // })
     }
     const onClickGetMax = async () => {
       const max = await checkAllowanceToken()
@@ -82,6 +127,7 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
         setValue('stake', String(max))
       }
     }
+    console.log('errors', errors)
     return (
       <>
         {/* Popup */}
@@ -132,10 +178,10 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
                             name={field.name}
                             ref={field.ref}
                             onBlur={field.onBlur}
+                            classNameError='hidden'
                           />
                         )}
                       />
-
                       <button
                         onClick={onClickGetMax}
                         className='rounded-xl  border border-[#17f3dd] px-2 text-center text-xs text-[#17f3dd] hover:opacity-80'
@@ -144,6 +190,9 @@ const ModalStartStaking = forwardRef<{ openModal: () => void; getReward: () => v
                         max
                       </button>
                     </div>
+                  </div>
+                  <div className='my-1 min-h-[1.25rem] text-left text-sm font-normal text-[#ff0000]'>
+                    {errors.stake?.message}
                   </div>
                   <div className='mt-4 flex gap-2'>
                     <Button
