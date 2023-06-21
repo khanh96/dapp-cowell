@@ -54,7 +54,7 @@ function ButtonNonActive(props: ButtonNonActiveProps) {
   return (
     <button
       type={type}
-      className='flex w-full justify-center rounded-xl border-[#1e2740] bg-[#1e2740] px-6 py-3 text-[#677395] shadow-none'
+      className='flex w-full cursor-not-allowed justify-center rounded-xl border-[#1e2740] bg-[#1e2740] px-6 py-3 text-[#677395] shadow-none'
       disabled={disabled}
       {...rest}
     >

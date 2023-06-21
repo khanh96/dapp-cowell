@@ -146,6 +146,9 @@ export const MetamaskContextProvider = ({
         window.ethereum.on('accountsChanged', updateWallet)
         window.ethereum.on('chainChanged', updateWalletAndAccounts)
       }
+      window.ethereum.on('disconnect', () => {
+        console.log('disconnect')
+      })
     }
     getProvider()
     return () => {
@@ -156,6 +159,7 @@ export const MetamaskContextProvider = ({
 
   const connectMetaMask = async () => {
     setIsConnecting(true)
+    console.log('connectMetaMask')
     try {
       const accounts = await window.ethereum.request({
         method: 'eth_requestAccounts'
@@ -206,16 +210,8 @@ export const MetamaskContextProvider = ({
   )
 
   const clearAccount = useCallback(async () => {
+    console.log('clearAccount')
     setWallet(disconnectedState)
-    // const account = await window.ethereum.request({
-    //   method: 'eth_requestAccounts',
-    //   params: [
-    //     {
-    //       eth_accounts: {}
-    //     }
-    //   ]
-    // })
-    // console.log('aaaa', account)
   }, [])
 
   const disconnectWallet = useCallback(() => {

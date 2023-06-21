@@ -10,17 +10,6 @@ function testAmountMax(this: yup.TestContext<yup.AnyObject>) {
   return amount !== '' || maxStake !== ''
 }
 
-// function testAllowanceStake(this: yup.TestContext<yup.AnyObject>): boolean {
-//   const { stake } = this.parent as { stake: string }
-//   const { stakeAllow } = this.options.context as { stakeAllow: string }
-//   console.log('stakeAllow', stakeAllow)
-//   console.log('stake', stake)
-//   if (stake !== '' && stakeAllow !== '') {
-//     return Number(stakeAllow) >= Number(stake)
-//   }
-//   return stake !== '' || stakeAllow !== ''
-// }
-
 const testAllowanceStake = (value: string, ctx: yup.TestContext<yup.AnyObject>) => {
   const { stakeAllow } = ctx.options.context as { stakeAllow: string }
   if (Number(value) > Number(stakeAllow)) {

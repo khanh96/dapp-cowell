@@ -7,7 +7,19 @@ export default function Wallet() {
   const { userBalance, tokenSymbol, disconnectWallet, wallet } = useMetamask()
 
   const onClickDisconnectWallet = async () => {
+    // disconnectWallet()
+    // window.ethereum.request({
+    //   method: 'wallet_requestPermissions',
+    //   params: [
+    //     {
+    //       eth_accounts: {}
+    //     }
+    //   ]
+    // })
+    console.log(window.ethereum.disconnect)
+    console.log(window.ethereum)
     disconnectWallet()
+    // window.ethereum.disconnect()
   }
   return (
     <div className='relative mx-auto mt-2 w-[300px] rounded-2xl border-transparent bg-gradient-to-tl from-[#ffe96f] to-[#00e4ce] p-[2px]'>
