@@ -4,6 +4,8 @@ import { path } from 'src/constants/path'
 import MainLayout from 'src/layouts/MainLayout'
 
 import NotFound from 'src/pages/NotFound'
+import ProposalCreate from 'src/pages/ProposalCreate'
+import ProposalDetail from 'src/pages/ProposalDetail'
 import Proposals from 'src/pages/Proposals'
 // import Earn from 'src/pages/Earn'
 // import Home from 'src/pages/Home'
@@ -29,6 +31,14 @@ export default function useRouterElement() {
         {
           path: path.dao,
           element: <Proposals />
+        },
+        {
+          path: path.proposal_create,
+          element: <ProposalCreate />
+        },
+        {
+          path: path.proposal_detail,
+          element: <ProposalDetail />
         },
         {
           path: '*',

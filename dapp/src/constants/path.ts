@@ -5,5 +5,7 @@ export const path = {
   lucky: '/lucky',
   nft: '/nft',
   aifi: '/aifi',
-  dao: '/dao'
+  dao: '/proposals',
+  proposal_create: '/proposals/create',
+  proposal_detail: '/proposals/:id'
 }

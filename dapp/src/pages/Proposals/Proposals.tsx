@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, Outlet } from 'react-router-dom'
 import logoCoin from 'src/assets/images/logo-cw.png'
 import Button from 'src/components/Button'
 import { path } from 'src/constants/path'
@@ -19,9 +19,9 @@ export default function Proposals() {
                   <span className='text-sm'>2</span>
                   <span className='ml-2 text-sm text-[#f44061]'>Failed</span>
                 </div>
-                <Button kindButton='active' className='btn-primary text-sm'>
+                <Link to={path.proposal_create} className='btn-primary text-sm'>
                   Create new proposal
-                </Button>
+                </Link>
               </div>
             </div>
             <table className='hidden w-full table-auto px-4 py-3 text-white md:inline-table'>
