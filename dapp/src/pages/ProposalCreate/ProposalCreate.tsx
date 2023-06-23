@@ -1,12 +1,27 @@
+import { useForm } from 'react-hook-form'
 import Button from 'src/components/Button'
 
+type FormData = {
+  title: ''
+  desc: ''
+}
+
 export default function ProposalCreate() {
+  const { control, handleSubmit } = useForm<FormData>({
+    defaultValues: {
+      title: '',
+      desc: ''
+    }
+  })
+
+  const onSubmitCreateProposal = handleSubmit((data) => {
+    console.log(data)
+  })
+
   return (
     <main className='container max-w-[960px]'>
       <section>
         <div className='mt-10'>
-          {/* {' '}
-          rgb(156, 81, 255) 0%, rgb(85, 161, 255) 50%, rgb(156, 81, 255) */}
           <h2 className='bg-gradient-to-r from-[#9C51FF] from-35% via-[#55A1FF] via-50% to-[#9C51FF] to-65% bg-clip-text text-center text-3xl font-semibold text-transparent'>
             Create a new proposal
           </h2>
@@ -50,7 +65,7 @@ export default function ProposalCreate() {
               </div>
               <div className='m-0 h-[2px] w-full bg-gradient-to-br from-[#9c51ff] via-[#55a1ff] to-[#9c51ff] p-0'></div>
               <div className='p-5'>
-                <form>
+                <form onSubmit={onSubmitCreateProposal}>
                   <div className='mb-6'>
                     <label htmlFor='title' className='mb-2 block text-sm font-medium text-gray-900 dark:text-white'>
                       Title
@@ -72,10 +87,8 @@ export default function ProposalCreate() {
                       rows={4}
                       className='block w-full rounded-lg border border-gray-600 bg-gray-900 p-2.5  text-sm text-white placeholder-gray-400 focus:border-[#9c51ff] focus:outline-none  focus:ring-1 '
                       placeholder='Enter the description of your proposal as markdown text...'
-                      defaultValue={''}
                     />
                   </div>
-
                   <Button
                     kindButton='active'
                     type='submit'
@@ -87,7 +100,6 @@ export default function ProposalCreate() {
               </div>
             </div>
           </div>
-          <div className=''></div>
         </div>
       </section>
     </main>

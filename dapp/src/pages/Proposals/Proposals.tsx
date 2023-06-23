@@ -44,7 +44,10 @@ export default function Proposals() {
                         alt='logo'
                       />
                       <div className='ml-3'>
-                        <Link to={path.home} className='mb-1 text-base font-normal line-clamp-1'>
+                        <Link
+                          to={`${path.proposal_detail.replace(':id', '1')}`}
+                          className='mb-1 text-base font-normal line-clamp-1'
+                        >
                           [UPDATED] AIP-1.1 - Lockup, Budget, Transparency
                         </Link>
                         <div className='flex items-center'>
