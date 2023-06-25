@@ -3,13 +3,17 @@ import Modal from '../Modal'
 import useMetamask from 'src/utils/hooks/useMetamask'
 import Button from '../Button'
 
-export default function ModalVoting() {
+interface ModalVotingProps {
+  setIsModalVoting: (isOpen: boolean) => void
+}
+export default function ModalVoting(props: ModalVotingProps) {
+  const { setIsModalVoting } = props
   const { wallet } = useMetamask()
   return (
     <>
-      <Modal onClose={() => null}>
+      <Modal onClose={() => setIsModalVoting(false)}>
         <div className='relative mx-auto mt-2 w-[500px] rounded-2xl border-transparent bg-gradient-to-tl from-[#ffe96f] to-[#00e4ce] p-[2px]'>
-          <form onSubmit={() => null}>
+          <form onSubmit={() => setIsModalVoting(false)}>
             <div className='h-full w-full rounded-2xl bg-darkBlue p-4'>
               <div className='flex justify-end'>
                 <svg
@@ -58,10 +62,10 @@ export default function ModalVoting() {
                           fill='currentColor'
                         />
                       </svg>
-                      <label htmlFor='vote-1' className='ml-2 w-full py-4 text-sm font-medium text-gray-300'>
+                      <label htmlFor='vote-2' className='ml-2 w-full py-4 text-sm font-medium text-gray-300'>
                         Against
                       </label>
-                      <input id='vote-1' type='radio' checked={true} name='vote' className='h-4 w-4 ' />
+                      <input id='vote-2' type='radio' checked={true} name='vote' className='h-4 w-4 ' />
                     </div>
                     <div className='mb-3 flex items-center justify-between rounded border border-gray-700 px-5 hover:border-[#667085]'>
                       <svg viewBox='0 0 512 512' focusable='false' className='h-4 w-4  text-gray-300'>
@@ -70,10 +74,10 @@ export default function ModalVoting() {
                           fill='currentColor'
                         />
                       </svg>
-                      <label htmlFor='vote-1' className='ml-2 w-full py-4 text-sm font-medium text-gray-300'>
+                      <label htmlFor='vote-3' className='ml-2 w-full py-4 text-sm font-medium text-gray-300'>
                         Abstain
                       </label>
-                      <input id='vote-1' type='radio' checked={true} name='vote' className='h-4 w-4 ' />
+                      <input id='vote-3' type='radio' checked={true} name='vote' className='h-4 w-4 ' />
                     </div>
                   </div>
                 </div>
@@ -87,14 +91,8 @@ export default function ModalVoting() {
                   />
                 </div>
                 <div className='px-3 py-3'>
-                  <Button
-                    kindButton='active'
-                    type='submit'
-                    className='group relative mb-2 mr-2 inline-flex w-full items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-purple-600 to-blue-500 p-0.5 text-sm font-medium  text-white hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-800 group-hover:from-purple-600 group-hover:to-blue-500'
-                  >
-                    <span className='relative w-full rounded-md bg-white px-5 py-2.5 transition-all duration-75 ease-in group-hover:bg-opacity-0 dark:bg-gray-900'>
-                      Submit
-                    </span>
+                  <Button kindButton='active' type='submit' className='btn-outline flex justify-center'>
+                    Submit
                   </Button>
                 </div>
               </div>

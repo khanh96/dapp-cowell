@@ -7,12 +7,40 @@ import HighchartsReact from 'highcharts-react-official'
 
 const options: Highcharts.Options = {
   title: {
-    text: 'DAO'
+    text: 'DAO',
+    style: {
+      opacity: 0
+    }
+  },
+  chart: {
+    backgroundColor: '#060818'
+  },
+  credits: {
+    enabled: false
   },
   series: [
     {
       type: 'pie',
-      data: [1, 3, 2]
+      data: [
+        {
+          y: 5,
+          name: 'For',
+          color: '#25C9A1',
+          borderColor: '#25C9A1'
+        },
+        {
+          y: 6,
+          name: 'Against',
+          color: '#f44061',
+          borderColor: '#f44061'
+        },
+        {
+          y: 10,
+          name: 'Abstain',
+          color: '#667085',
+          borderColor: '#667085'
+        }
+      ]
     }
   ]
 }
@@ -32,7 +60,7 @@ export default function ProposalDetail() {
                   [UPDATED] AIP-1.1 - Lockup, Budget, Transparency
                 </h2>
                 <div className='ml-10 flex-shrink-0'>
-                  <Button kindButton='active' className='btn-primary w-fit'>
+                  <Button kindButton='active' className='btn-primary w-fit' onClick={() => setIsModalVoting(true)}>
                     Vote on-chain
                   </Button>
                 </div>
@@ -189,7 +217,7 @@ export default function ProposalDetail() {
           </div>
         </div>
       </section>
-      {isModalVoting && <ModalVoting />}
+      {isModalVoting && <ModalVoting setIsModalVoting={setIsModalVoting} />}
     </main>
   )
 }
