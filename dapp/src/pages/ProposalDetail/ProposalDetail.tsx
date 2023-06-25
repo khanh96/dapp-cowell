@@ -1,9 +1,24 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import Button from 'src/components/Button'
 import ModalVoting from 'src/components/ModalVoting'
 import Tabs from 'src/components/Tabs'
+import * as Highcharts from 'highcharts'
+import HighchartsReact from 'highcharts-react-official'
+
+const options: Highcharts.Options = {
+  title: {
+    text: 'DAO'
+  },
+  series: [
+    {
+      type: 'pie',
+      data: [1, 3, 2]
+    }
+  ]
+}
 
 export default function ProposalDetail() {
+  const chartComponentRef = useRef<HighchartsReact.RefObject>(null)
   const [isModalVoting, setIsModalVoting] = useState(false)
   return (
     <main className='container max-w-[1024px]'>
@@ -69,6 +84,10 @@ export default function ProposalDetail() {
                     <span className='text-sm text-[#667085]'>99.54%</span>
                   </div>
                 </div>
+              </div>
+              {/* Chart */}
+              <div>
+                <HighchartsReact highcharts={Highcharts} options={options} ref={chartComponentRef} />
               </div>
               <div className='mt-5 rounded-xl border border-[#1e2740]'>
                 <h3 className='px-5 py-3 text-xl font-bold text-white'>Detail</h3>
