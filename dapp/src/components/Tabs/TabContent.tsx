@@ -15,9 +15,9 @@ export default function TabContent(props: TabContentProps) {
       </div>
       {Array(3)
         .fill(1)
-        .map((x) => {
+        .map((x, index) => {
           return (
-            <div className='flex items-center justify-between border-b border-[#1e2740] p-4' key={x}>
+            <div className='flex items-center justify-between border-b border-[#1e2740] p-4' key={index}>
               <div className='flex items-center justify-start'>
                 <div className='mr-3 h-12 w-12'>
                   <img

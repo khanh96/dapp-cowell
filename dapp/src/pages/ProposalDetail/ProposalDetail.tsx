@@ -4,6 +4,8 @@ import ModalVoting from 'src/components/ModalVoting'
 import Tabs from 'src/components/Tabs'
 import * as Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
+import { useQuery } from '@tanstack/react-query'
+import { proposalApi } from 'src/apis/proposal.api'
 
 const options: Highcharts.Options = {
   title: {
@@ -23,19 +25,19 @@ const options: Highcharts.Options = {
       type: 'pie',
       data: [
         {
-          y: 5,
+          y: 10,
           name: 'For',
           color: '#25C9A1',
           borderColor: '#25C9A1'
         },
         {
-          y: 6,
+          y: 7,
           name: 'Against',
           color: '#f44061',
           borderColor: '#f44061'
         },
         {
-          y: 10,
+          y: 4,
           name: 'Abstain',
           color: '#667085',
           borderColor: '#667085'
@@ -48,6 +50,12 @@ const options: Highcharts.Options = {
 export default function ProposalDetail() {
   const chartComponentRef = useRef<HighchartsReact.RefObject>(null)
   const [isModalVoting, setIsModalVoting] = useState(false)
+
+  // const { data: proposalDetail } = useQuery({
+  //   queryKey: ['proposals'],
+  //   queryFn: () => proposalApi.getProposal('1')
+  // })
+
   return (
     <main className='container max-w-[1024px]'>
       <section className='pb-10'>
@@ -123,7 +131,7 @@ export default function ProposalDetail() {
                 <div className='px-5 py-3 text-sm text-[#667085]'>
                   ATTENTION: This is an updated version of a similar proposal that has been put up for a vote a day
                   prior to this one. We have discovered that the target vesting contract in the previous proposal had an
-                  incorrect "start" date. A more detailed explanation is provided below. Please do not vote on the other
+                  incorrect start date. A more detailed explanation is provided below. Please do not vote on the other
                   proposal and vote on this proposal instead. What happened? The way this proposal works is that there
                   is a special AIP smart contract (AIP1Point1Target) that references the location of the vesting vault
                   for the Foundation Administrative Budget Wallet. The on-chain action that the proposal is executing is

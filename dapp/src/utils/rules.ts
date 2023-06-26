@@ -31,8 +31,21 @@ export const stakingSchema = yup.object({
   })
 })
 
+export const proposalSchema = yup.object({
+  name: yup.string().required('Title is required'),
+  description: yup.string().required('Description is required'),
+  vote: yup.string().required('Vote is required'),
+  comment: yup.string().required('Comment is required')
+})
+
 export const validAmountSchema = stakingSchema.pick(['amount'])
 export type ValidAmountSchemaType = yup.InferType<typeof validAmountSchema>
 
 export const validStakeSchema = stakingSchema.pick(['stake'])
 export type ValidStakeSchemaType = yup.InferType<typeof validStakeSchema>
+
+export const validVotingSchema = proposalSchema.pick(['vote', 'comment'])
+export type ValidVotingSchemaType = yup.InferType<typeof validVotingSchema>
+
+export const validProposalSchema = proposalSchema.pick(['name', 'description'])
+export type ValidProposalSchemaType = yup.InferType<typeof validProposalSchema>

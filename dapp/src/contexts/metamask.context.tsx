@@ -13,6 +13,7 @@ import {
   readTokenSymbol,
   readTotalSupply
 } from 'src/abi/common.abi'
+import { NETWORKS } from 'src/constants/metamask.constants'
 
 interface MetamaskContextInterface {
   errorMessage: string
@@ -105,7 +106,12 @@ export const MetamaskContextProvider = ({
   const clearError = () => setErrorMessage('')
 
   const _updateWallet = useCallback(async (providedAccounts?: any) => {
-    const accounts = providedAccounts || (await window.ethereum.request({ method: 'eth_accounts' }))
+    const accounts =
+      providedAccounts ||
+      (await window.ethereum.request({
+        method: 'eth_accounts'
+      }))
+
     if (accounts.length === 0) {
       // If there are no accounts, then the user is disconnected
       setWallet(disconnectedState)
@@ -121,6 +127,10 @@ export const MetamaskContextProvider = ({
     const chainId = await window.ethereum.request({
       method: 'eth_chainId'
     })
+    if (chainId !== '0xaa36a7') {
+      console.log('chainId=>', chainId)
+      changeNetwork()
+    }
 
     // have connected with wallet=accounts and network=chainId
 
@@ -130,17 +140,35 @@ export const MetamaskContextProvider = ({
   const updateWalletAndAccounts = useCallback(() => _updateWallet(), [_updateWallet])
   const updateWallet = useCallback(
     (accounts: any) => {
-      console.log('aaaa')
       _updateWallet(accounts)
     },
     [_updateWallet]
   )
 
+  const switchNetwork = useCallback(async () => {
+    console.log('switchNetwork')
+    try {
+      if (!window.ethereum) throw new Error('No crypto wallet found')
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [
+          {
+            ...NETWORKS['sepoliaTestnet']
+          }
+        ]
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+
+  const changeNetwork = useCallback(() => switchNetwork(), [switchNetwork])
+
   useEffect(() => {
     const getProvider = async () => {
       const provider = await detectEthereumProvider({ silent: true })
       setHasProvider(Boolean(provider))
-
+      console.log('provider=>', provider)
       if (provider) {
         updateWalletAndAccounts()
         window.ethereum.on('accountsChanged', updateWallet)
@@ -187,6 +215,8 @@ export const MetamaskContextProvider = ({
       const contractStakingWithSigner = contractStakingCowell.connect(newAccount) as ContractStaking
       setContractToken(contractTokenCowell)
       setContractStaking(contractStakingWithSigner)
+      console.log('contractTokenCowell=>', contractTokenCowell)
+      console.log('aaaaa=>', import.meta.env.VITE_CONTRACT_TOKEN_COWELL, ERC20_ABI_TOKEN, newAccount)
       try {
         const tokenSymbol = await readTokenSymbol(contractTokenCowell)
         const tokenBalanceOfContract = await readBalanceOfContract(

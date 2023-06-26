@@ -2,18 +2,48 @@ import React from 'react'
 import Modal from '../Modal'
 import useMetamask from 'src/utils/hooks/useMetamask'
 import Button from '../Button'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { ValidVotingSchemaType, validVotingSchema } from 'src/utils/rules'
 
 interface ModalVotingProps {
   setIsModalVoting: (isOpen: boolean) => void
 }
+
+const votes = {
+  for: 'for-vote',
+  against: 'against',
+  abstain: 'abstain'
+}
+
+type FormData = ValidVotingSchemaType
+
 export default function ModalVoting(props: ModalVotingProps) {
   const { setIsModalVoting } = props
-  const { wallet } = useMetamask()
+  const {
+    handleSubmit,
+    register,
+    formState: { errors }
+  } = useForm<FormData>({
+    defaultValues: {
+      comment: '',
+      vote: 'for-vote'
+    },
+    resolver: yupResolver(validVotingSchema)
+  })
+
+  const onSubmitVoting = handleSubmit((data) => {
+    // setIsModalVoting(false)
+    console.log(data)
+    // Call Api
+  })
+  console.log(errors)
+
   return (
     <>
       <Modal onClose={() => setIsModalVoting(false)}>
         <div className='relative mx-auto mt-2 w-[500px] rounded-2xl border-transparent bg-gradient-to-tl from-[#ffe96f] to-[#00e4ce] p-[2px]'>
-          <form onSubmit={() => setIsModalVoting(false)}>
+          <form onSubmit={onSubmitVoting}>
             <div className='h-full w-full rounded-2xl bg-darkBlue p-4'>
               <div className='flex justify-end'>
                 <svg
@@ -46,10 +76,10 @@ export default function ModalVoting(props: ModalVotingProps) {
                         />
                       </svg>
 
-                      <label htmlFor='vote-1' className='ml-2 w-full py-4 text-sm font-medium text-gray-300'>
+                      <label htmlFor={votes.for} className='ml-2 w-full py-4 text-sm font-medium text-gray-300'>
                         For
                       </label>
-                      <input id='vote-1' type='radio' checked={true} name='vote' className='h-4 w-4 ' />
+                      <input id={votes.for} type='radio' value={votes.for} className='h-4 w-4' {...register('vote')} />
                     </div>
                     <div className='mb-3 flex items-center justify-between rounded border border-gray-700 px-5 hover:border-[#f44061]'>
                       <svg
@@ -62,10 +92,16 @@ export default function ModalVoting(props: ModalVotingProps) {
                           fill='currentColor'
                         />
                       </svg>
-                      <label htmlFor='vote-2' className='ml-2 w-full py-4 text-sm font-medium text-gray-300'>
+                      <label htmlFor={votes.against} className='ml-2 w-full py-4 text-sm font-medium text-gray-300'>
                         Against
                       </label>
-                      <input id='vote-2' type='radio' checked={true} name='vote' className='h-4 w-4 ' />
+                      <input
+                        id={votes.against}
+                        type='radio'
+                        value={votes.against}
+                        className='h-4 w-4'
+                        {...register('vote')}
+                      />
                     </div>
                     <div className='mb-3 flex items-center justify-between rounded border border-gray-700 px-5 hover:border-[#667085]'>
                       <svg viewBox='0 0 512 512' focusable='false' className='h-4 w-4  text-gray-300'>
@@ -74,21 +110,32 @@ export default function ModalVoting(props: ModalVotingProps) {
                           fill='currentColor'
                         />
                       </svg>
-                      <label htmlFor='vote-3' className='ml-2 w-full py-4 text-sm font-medium text-gray-300'>
+                      <label htmlFor={votes.abstain} className='ml-2 w-full py-4 text-sm font-medium text-gray-300'>
                         Abstain
                       </label>
-                      <input id='vote-3' type='radio' checked={true} name='vote' className='h-4 w-4 ' />
+                      <input
+                        id={votes.abstain}
+                        type='radio'
+                        value={votes.abstain}
+                        className='h-4 w-4'
+                        {...register('vote')}
+                      />
                     </div>
                   </div>
                 </div>
-                <div className='mt-2 px-3'>
-                  <p className='mb-2 text-[#667085]'>Add comment</p>
+
+                <div className='px-3'>
+                  <p className='mb-2 text-[#667085]'>Comment</p>
                   <textarea
                     id='comment'
                     rows={4}
                     className='block w-full rounded-lg border border-gray-700 bg-gray-900 p-2.5  text-sm text-white placeholder-gray-400 focus:border-[#f67712] focus:outline-none  focus:ring-1 '
-                    placeholder='Tell the community your thoughts...'
+                    placeholder='Enter the comment reason voting...'
+                    {...register('comment')}
                   />
+                  <div className='my-1 min-h-[1.25rem] text-left text-sm font-normal text-[#ff0000]'>
+                    {errors.comment?.message}
+                  </div>
                 </div>
                 <div className='px-3 py-3'>
                   <Button kindButton='active' type='submit' className='btn-outline flex justify-center'>
