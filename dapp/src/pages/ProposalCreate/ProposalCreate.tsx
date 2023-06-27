@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import Button from 'src/components/Button'
 import { useProposal } from 'src/utils/hooks/useProposal'
 import { ValidProposalSchemaType, validProposalSchema } from 'src/utils/rules'
+import moment from 'moment'
 
 type FormData = ValidProposalSchemaType
 
@@ -23,8 +24,10 @@ export default function ProposalCreate() {
   const onSubmitCreateProposal = handleSubmit((data) => {
     const params = {
       ...data,
-      threshold: 100,
-      needed: 10
+      voteFor: 80,
+      voteAgainst: 40,
+      voteAbstain: 0,
+      create_at: moment().format('MMM Do, YYYY')
     }
     createProposal(params)
   })

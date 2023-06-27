@@ -7,5 +7,5 @@ export const path = {
   aifi: '/aifi',
   dao: '/proposals',
   proposal_create: '/proposals/create',
-  proposal_detail: '/proposals/:id'
+  proposal_detail: '/proposal/:proposalId'
 }

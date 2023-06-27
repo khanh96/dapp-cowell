@@ -236,7 +236,7 @@ export const MetamaskContextProvider = ({
       setErrorMessage(err.message)
     }
     setIsConnecting(false)
-  }, [])
+  }, [updateWallet])
 
   const accountChangedHandler = useCallback(
     async (newAccount: ethers.providers.JsonRpcSigner) => {

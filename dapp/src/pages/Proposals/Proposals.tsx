@@ -1,8 +1,10 @@
+import classNames from 'classnames'
 import { Link, Outlet } from 'react-router-dom'
 import logoCoin from 'src/assets/images/logo-cw.png'
 import Button from 'src/components/Button'
 import { path } from 'src/constants/path'
 import { useProposal } from 'src/utils/hooks/useProposal'
+import { calculatePercent } from 'src/utils/utils'
 export default function Proposals() {
   const { proposalData } = useProposal()
 
@@ -41,6 +43,16 @@ export default function Proposals() {
                 {proposalData &&
                   proposalData?.data.length > 0 &&
                   proposalData?.data.map((proposal) => {
+                    const totalVote = proposal.voteFor + proposal.voteAgainst + proposal.voteAbstain
+                    const widthFor =
+                      proposal.voteFor !== 0 && proposal.voteAgainst !== 0
+                        ? calculatePercent(proposal.voteFor, totalVote)
+                        : 0
+                    const widthAgainst =
+                      proposal.voteFor !== 0 && proposal.voteAgainst !== 0
+                        ? calculatePercent(proposal.voteAgainst, totalVote)
+                        : 0
+
                     return (
                       <tr className='border border-[#1e2740]' key={proposal._id}>
                         <td className='px-4 py-4'>
@@ -52,7 +64,7 @@ export default function Proposals() {
                             />
                             <div className='ml-3'>
                               <Link
-                                to={`${path.proposal_detail.replace(':id', '1')}`}
+                                to={`${path.proposal_detail.replace(':proposalId', proposal._id)}`}
                                 className='mb-1 text-base font-normal line-clamp-1'
                               >
                                 {proposal.name}
@@ -61,7 +73,7 @@ export default function Proposals() {
                                 <span className='bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>
                                   Active
                                 </span>
-                                <p className='ml-2 text-sm text-[#667085]'> Proposed on: Jun 8th, 2023</p>
+                                <p className='ml-2 text-sm text-[#667085]'> Proposed on: {proposal.create_at}</p>
                               </div>
                             </div>
                           </div>
@@ -69,23 +81,29 @@ export default function Proposals() {
                         <td className='break-words px-4 py-3 text-sm'>Aribitrum Treasury</td>
                         <td className='px-4 py-4'>
                           <div className='flex flex-col items-start justify-start'>
-                            <p className='text-sm text-[#25C9A1]'>135.01M</p>
+                            <p className='text-sm text-[#25C9A1]'>{proposal.voteFor}M</p>
                             <div className='relative mt-2 h-1 w-[100px] rounded-sm bg-[#fcfcfd]'>
-                              <div className='absolute left-0 top-0 h-1 w-[50%] rounded-sm bg-[#25C9A1]'></div>
+                              <div
+                                className='absolute left-0 top-0 h-1 rounded-sm bg-[#25C9A1]'
+                                style={{ width: `${widthFor}%` }}
+                              ></div>
                             </div>
                           </div>
                         </td>
                         <td className='px-4 py-4'>
                           <div className='flex flex-col items-start justify-start'>
-                            <p className='text-sm text-[#f44061]'>657.07K</p>
+                            <p className='text-sm text-[#f44061]'>{proposal.voteAgainst}K</p>
                             <div className='relative mt-2 h-1 w-[100px] rounded-sm bg-[#fcfcfd]'>
-                              <div className='absolute left-0 top-0 h-1 w-[20%] rounded-sm bg-[#f44061]'></div>
+                              <div
+                                className='absolute left-0 top-0 h-1  rounded-sm bg-[#f44061]'
+                                style={{ width: `${widthAgainst}%` }}
+                              ></div>
                             </div>
                           </div>
                         </td>
                         <td className='px-4 py-4'>
                           <div className='flex flex-col items-end'>
-                            <p className='text-sm font-bold text-[#677395]'>135.73M</p>
+                            <p className='text-sm font-bold text-[#677395]'>{totalVote}M</p>
                             <p className='text-right text-sm text-[#667085]'>39297 addresses</p>
                           </div>
                         </td>

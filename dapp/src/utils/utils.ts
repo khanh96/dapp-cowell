@@ -12,3 +12,7 @@ export const formatDotAccount = (address: string): string => {
   const lastAddress = address.substr(address.length - 5)
   return `${firstAddress}...${lastAddress}`
 }
+
+export const calculatePercent = (number: number, total: number) => {
+  return Math.round((number / total) * 100)
+}

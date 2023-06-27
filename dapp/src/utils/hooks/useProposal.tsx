@@ -3,9 +3,12 @@ import useMetamask from './useMetamask'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { CreateProposalBody, proposalApi } from 'src/apis/proposal.api'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import { path } from 'src/constants/path'
 
 export const useProposal = () => {
   const { wallet } = useMetamask()
+  const navigate = useNavigate()
   const { data: proposalData, refetch: proposalRefetch } = useQuery({
     queryKey: ['proposals'],
     queryFn: () => proposalApi.getProposals()
@@ -20,6 +23,7 @@ export const useProposal = () => {
       toast.success('Create proposal success', {
         autoClose: 1000
       })
+      navigate({ pathname: path.dao })
     }
   })
 

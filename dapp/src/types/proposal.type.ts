@@ -1,5 +1,9 @@
 export interface Proposal {
+  _id: string
   description: string
   name: string
-  _id: string
+  voteFor: number
+  voteAgainst: number
+  voteAbstain: number
+  create_at: string
 }
