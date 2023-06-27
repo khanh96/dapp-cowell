@@ -148,7 +148,6 @@ export default function useStaking() {
   useEffect(() => {
     if (contractToken) {
       readAllowance(contractToken, wallet.accounts[0]).then((res) => {
-        console.log('aaaaaa', res)
         if (Number(res) <= 0) {
           setIsDisabledStake(true)
         } else {

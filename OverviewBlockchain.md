@@ -121,11 +121,8 @@ PBFT là một cơ chế đồng thuận được sử dụng trong các hệ th
 - List RPC cung cấp [Tài liệu tham khảo](https://chainlist.org/chain/11155111)
 
 
-
 ## Define
 - **Native token**: Native token (đồng token gốc) trong blockchain là đơn vị tiền tệ được sử dụng mặc định trên mạng blockchain đó. Nó là đồng tiền gốc của mạng, được sử dụng để định giá các hoạt động và giao dịch trên nền tảng blockchain.
-
-
 
 
 ## Functionality
@@ -136,3 +133,7 @@ PBFT là một cơ chế đồng thuận được sử dụng trong các hệ th
   - Từ spender (tk muốn lấy tiền) sẽ rút tiền từ from là (tk đưa tiền) và to là (tk nhận tiền).
 - **approve(spender, amount)** tk owner cho phép người muốn lấy tiền được lấy bao nhiêu tiền.
 - **burn(amount)** đốt tiền. bản chất là nó sẽ gửi tiền vào địa chỉ 0x0000000 để vứt 1 số tiền nhất định.
+
+
+# Teachnic
+- How To Approve Token Transfers Without Spending Gas Using EIP-2612 [Link](https://www.quicknode.com/guides/ethereum-development/transactions/how-to-use-erc20-permit-approval)

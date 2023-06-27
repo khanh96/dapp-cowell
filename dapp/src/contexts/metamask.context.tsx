@@ -13,7 +13,7 @@ import {
   readTokenSymbol,
   readTotalSupply
 } from 'src/abi/common.abi'
-import { NETWORKS } from 'src/constants/metamask.constants'
+import { AddEthereumChainParameter, ERROR_CODE_REQUEST_PENDING, ErrorWithCode } from 'src/types/metamask.type'
 
 interface MetamaskContextInterface {
   errorMessage: string
@@ -46,6 +46,8 @@ interface MetaMaskContextData {
   isConnecting: boolean
   connectMetaMask: () => void
   clearError: () => void
+  addChain: (parameters: AddEthereumChainParameter) => Promise<void>
+  switchChain: (chainId: string) => Promise<void>
 }
 
 const initialWalletState = {
@@ -80,6 +82,64 @@ export const disconnectedState: WalletState = { accounts: [], balance: '', chain
 
 export const MetamaskContext = React.createContext<MetaMaskContextData & MetamaskContextInterface>({})
 
+function getMetaMaskProvider() {
+  const ethereum = window.ethereum
+  if (!ethereum) return null
+  // The `providers` field is populated
+  // - when CoinBase Wallet extension is also installed
+  // - when user is on Brave and Brave Wallet is not deactivated
+  // The expected object is an array of providers, the MetaMask provider is inside
+  // See https://docs.cloud.coinbase.com/wallet-sdk/docs/injected-provider-guidance for more information
+  // See also https://metamask.zendesk.com/hc/en-us/articles/360038596792-Using-Metamask-wallet-in-Brave-browser
+  if (Array.isArray(ethereum.providers)) {
+    const metaMaskProvider = ethereum.providers.find((p: any) => p.isMetaMask && !p.isBraveWallet)
+    if (metaMaskProvider) return metaMaskProvider
+    const braveWalletProvider = ethereum.providers.find((p: any) => p.isMetaMask && p.isBraveWallet)
+    if (!braveWalletProvider) return null
+    return braveWalletProvider
+  }
+  if (!ethereum.isMetaMask) return null
+  return ethereum
+}
+
+function getSafeMetaMaskProvider() {
+  const ethereum = getMetaMaskProvider()
+  if (!ethereum) {
+    throw new Error('MetaMask provider must be present in order to use this method')
+  }
+  return ethereum
+}
+
+async function switchEthereumChain(chainId: string) {
+  const ethereum = getSafeMetaMaskProvider()
+  try {
+    await ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId }]
+    })
+  } catch (err: unknown) {
+    if ('code' in (err as { [key: string]: any })) {
+      if ((err as ErrorWithCode).code === ERROR_CODE_REQUEST_PENDING) return
+    }
+    throw err
+  }
+}
+
+async function addEthereumChain(parameters: AddEthereumChainParameter) {
+  const ethereum = getSafeMetaMaskProvider()
+  try {
+    await ethereum.request({
+      method: 'wallet_addEthereumChain',
+      params: [parameters]
+    })
+  } catch (err: unknown) {
+    if ('code' in (err as { [key: string]: any })) {
+      if ((err as ErrorWithCode).code === ERROR_CODE_REQUEST_PENDING) return
+    }
+    throw err
+  }
+}
+
 export const MetamaskContextProvider = ({
   children,
   defaultValue = initialMetamaskContext
@@ -106,9 +166,10 @@ export const MetamaskContextProvider = ({
   const clearError = () => setErrorMessage('')
 
   const _updateWallet = useCallback(async (providedAccounts?: any) => {
+    const ethereum = getSafeMetaMaskProvider()
     const accounts =
       providedAccounts ||
-      (await window.ethereum.request({
+      (await ethereum.request({
         method: 'eth_accounts'
       }))
 
@@ -119,25 +180,42 @@ export const MetamaskContextProvider = ({
     }
     // native token
     const balance = formatEther(
-      await window.ethereum.request({
+      await ethereum.request({
         method: 'eth_getBalance',
         params: [accounts[0], 'latest']
       })
     )
-    const chainId = await window.ethereum.request({
+    const chainId = await ethereum.request({
       method: 'eth_chainId'
     })
-    if (chainId !== '0xaa36a7') {
-      console.log('chainId=>', chainId)
-      changeNetwork()
-    }
-
     // have connected with wallet=accounts and network=chainId
-
     setWallet({ accounts, balance, chainId })
   }, [])
 
-  const updateWalletAndAccounts = useCallback(() => _updateWallet(), [_updateWallet])
+  const switchChain = React.useCallback((chainId: string) => {
+    console.log('switchChain')
+    const ethereum = getSafeMetaMaskProvider()
+    if (!ethereum) {
+      console.warn(
+        '`switchChain` method has been called while MetaMask is not available or synchronising. Nothing will be done in this case.'
+      )
+      return Promise.resolve()
+    }
+    return switchEthereumChain(chainId)
+  }, [])
+
+  const addChain = React.useCallback((parameters: AddEthereumChainParameter) => {
+    const ethereum = getSafeMetaMaskProvider()
+    if (!ethereum) {
+      console.warn(
+        '`addChain` method has been called while MetaMask is not available or synchronising. Nothing will be done in this case.'
+      )
+      return Promise.resolve()
+    }
+    return addEthereumChain(parameters)
+  }, [])
+
+  const updateWalletAndAccounts = useCallback(async () => _updateWallet(), [_updateWallet])
   const updateWallet = useCallback(
     (accounts: any) => {
       _updateWallet(accounts)
@@ -145,51 +223,11 @@ export const MetamaskContextProvider = ({
     [_updateWallet]
   )
 
-  const switchNetwork = useCallback(async () => {
-    console.log('switchNetwork')
-    try {
-      if (!window.ethereum) throw new Error('No crypto wallet found')
-      await window.ethereum.request({
-        method: 'wallet_addEthereumChain',
-        params: [
-          {
-            ...NETWORKS['sepoliaTestnet']
-          }
-        ]
-      })
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
-
-  const changeNetwork = useCallback(() => switchNetwork(), [switchNetwork])
-
-  useEffect(() => {
-    const getProvider = async () => {
-      const provider = await detectEthereumProvider({ silent: true })
-      setHasProvider(Boolean(provider))
-      console.log('provider=>', provider)
-      if (provider) {
-        updateWalletAndAccounts()
-        window.ethereum.on('accountsChanged', updateWallet)
-        window.ethereum.on('chainChanged', updateWalletAndAccounts)
-      }
-      window.ethereum.on('disconnect', () => {
-        console.log('disconnect')
-      })
-    }
-    getProvider()
-    return () => {
-      window.ethereum?.removeListener('accountsChanged', updateWallet)
-      window.ethereum?.removeListener('chainChanged', updateWalletAndAccounts)
-    }
-  }, [updateWallet, updateWalletAndAccounts])
-
-  const connectMetaMask = async () => {
+  const connectMetaMask = useCallback(async () => {
     setIsConnecting(true)
-    console.log('connectMetaMask')
+    const ethereum = getSafeMetaMaskProvider()
     try {
-      const accounts = await window.ethereum.request({
+      const accounts = await ethereum.request({
         method: 'eth_requestAccounts'
       })
       clearError()
@@ -198,7 +236,7 @@ export const MetamaskContextProvider = ({
       setErrorMessage(err.message)
     }
     setIsConnecting(false)
-  }
+  }, [])
 
   const accountChangedHandler = useCallback(
     async (newAccount: ethers.providers.JsonRpcSigner) => {
@@ -215,8 +253,6 @@ export const MetamaskContextProvider = ({
       const contractStakingWithSigner = contractStakingCowell.connect(newAccount) as ContractStaking
       setContractToken(contractTokenCowell)
       setContractStaking(contractStakingWithSigner)
-      console.log('contractTokenCowell=>', contractTokenCowell)
-      console.log('aaaaa=>', import.meta.env.VITE_CONTRACT_TOKEN_COWELL, ERC20_ABI_TOKEN, newAccount)
       try {
         const tokenSymbol = await readTokenSymbol(contractTokenCowell)
         const tokenBalanceOfContract = await readBalanceOfContract(
@@ -257,34 +293,78 @@ export const MetamaskContextProvider = ({
     }
   }, [wallet.accounts, accountChangedHandler])
 
-  console.log('stakingBalance=>', stakingBalance)
+  useEffect(() => {
+    const ethereum = getSafeMetaMaskProvider()
+    const getProvider = async () => {
+      const provider = await detectEthereumProvider({ silent: true })
+      setHasProvider(Boolean(provider))
 
-  return (
-    <MetamaskContext.Provider
-      value={{
-        errorMessage,
-        setErrorMessage,
-        setUserBalance,
-        userBalance,
-        tokenSymbol,
-        contractToken,
-        contractStaking,
-        stakingBalance,
-        setStakingBalance,
-        totalSupply,
-        setTotalSupply,
-        earnedTokens,
-        setEarnedTokens,
-        // ---new
-        connectMetaMask,
-        wallet,
-        hasProvider,
-        isConnecting,
-        clearError,
-        disconnectWallet
-      }}
-    >
-      {children}
-    </MetamaskContext.Provider>
+      if (provider) {
+        updateWalletAndAccounts()
+        ethereum.on('accountsChanged', updateWallet)
+        ethereum.on('chainChanged', updateWalletAndAccounts)
+      }
+      ethereum.on('disconnect', () => {
+        console.log('disconnect')
+      })
+    }
+    getProvider()
+    return () => {
+      window.ethereum?.removeListener('accountsChanged', updateWallet)
+      window.ethereum?.removeListener('chainChanged', updateWalletAndAccounts)
+    }
+  }, [updateWallet, updateWalletAndAccounts])
+
+  const value = React.useMemo(
+    () => ({
+      // ---staking
+      errorMessage,
+      setErrorMessage,
+      setUserBalance,
+      userBalance,
+      tokenSymbol,
+      contractToken,
+      contractStaking,
+      stakingBalance,
+      setStakingBalance,
+      totalSupply,
+      setTotalSupply,
+      earnedTokens,
+      setEarnedTokens,
+      // ---metamask
+      connectMetaMask,
+      wallet,
+      hasProvider,
+      isConnecting,
+      clearError,
+      disconnectWallet,
+      addChain,
+      switchChain
+    }),
+    [
+      errorMessage,
+      setErrorMessage,
+      setUserBalance,
+      userBalance,
+      tokenSymbol,
+      contractToken,
+      contractStaking,
+      stakingBalance,
+      setStakingBalance,
+      totalSupply,
+      setTotalSupply,
+      earnedTokens,
+      setEarnedTokens,
+      connectMetaMask,
+      wallet,
+      hasProvider,
+      isConnecting,
+      clearError,
+      disconnectWallet,
+      addChain,
+      switchChain
+    ]
   )
+
+  return <MetamaskContext.Provider value={value}>{children}</MetamaskContext.Provider>
 }
