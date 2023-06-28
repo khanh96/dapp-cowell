@@ -4,6 +4,8 @@ DAO là tổ chức tự trị phi tập trung. Khác với các tổ chức tru
 
 DAO hoạt động theo 2 loại hình chính, bao gồm: Token-based DAO và Share-based DAO.
 
+- Mỗi người có thể vote (for, against, abstain)
+
 **Token-based DAO**: 
 ![Alt text](image.png)
 
@@ -21,5 +23,7 @@ DAO hoạt động theo 2 loại hình chính, bao gồm: Token-based DAO và Sh
 - Tính pháp lý của DAO gần như bằng 0
 - Thính phi tập trung không bị quản lý bởi một cơ quan, chính phủ kiến DAO có khả năng bị tấn công cao. 
 - Thường bị trì hoãn gây thiệt hại lớn đối với những người tham gia.
+
+
 
 **Tất công flash loan attack**
