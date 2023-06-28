@@ -1,15 +1,48 @@
-import classNames from 'classnames'
 import { Link, Outlet } from 'react-router-dom'
-import logoCoin from 'src/assets/images/logo-cw.png'
 import Button from 'src/components/Button'
+import ModalDelegate from 'src/components/ModalDelegate'
 import { path } from 'src/constants/path'
+import useModal from 'src/utils/hooks/useModal'
 import { useProposal } from 'src/utils/hooks/useProposal'
-import { calculatePercent } from 'src/utils/utils'
+import { calculatePercent, formatDotAccount } from 'src/utils/utils'
 export default function Proposals() {
-  const { proposalData } = useProposal()
+  const { proposalData, metamaskCTX, votingPower } = useProposal()
+  const { isModalOpen, openModal, closeModal } = useModal()
 
+  const onClickDelegate = () => {
+    console.log('onClickDelegate')
+    // Call smart contract delegate
+    openModal()
+  }
   return (
     <main className='container max-w-[960px]'>
+      <section>
+        <div className='flex justify-between rounded-xl border border-[#1e2740] px-4 py-3 '>
+          <div className='flex items-center text-left font-medium text-white'>
+            <div className='mr-3 h-12 w-12'>
+              <img
+                src='https://images.unsplash.com/photo-1687314100832-d99ea1fe1c2f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=764&q=80'
+                alt='avatar'
+                className='h-full w-full rounded-full object-cover'
+              />
+            </div>
+            <span className='mr-3 text-sm text-white'>
+              {metamaskCTX.wallet.accounts[0] ? formatDotAccount(metamaskCTX.wallet.accounts[0]) : '0x0000'}
+            </span>
+          </div>
+          <div className='flex items-center justify-end text-right font-medium text-white'>
+            <div className='mr-5 flex items-center'>
+              <span className='mr-2 text-sm text-[#677395]'>Voting power:</span>
+              <span className='text-xl'>0.0</span>
+            </div>
+            <div>
+              <Button kindButton='active' className='btn-primary w-fit' onClick={onClickDelegate}>
+                Delegate
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
       <section>
         <div className='mt-10'>
           <div className=''>
@@ -208,6 +241,7 @@ export default function Proposals() {
           </div>
         </div>
       </section>
+      {isModalOpen && <ModalDelegate closeModal={closeModal} />}
     </main>
   )
 }

@@ -1,13 +1,15 @@
-import React from 'react'
 import Modal from '../Modal'
-import useMetamask from 'src/utils/hooks/useMetamask'
 import Button from '../Button'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { ValidVotingSchemaType, validVotingSchema } from 'src/utils/rules'
+import { validVotingSchema } from 'src/utils/rules'
+import { useProposal } from 'src/utils/hooks/useProposal'
+import { Proposal } from 'src/types/proposal.type'
+import { UpdateProposalBody } from 'src/apis/proposal.api'
 
 interface ModalVotingProps {
   setIsModalVoting: (isOpen: boolean) => void
+  proposal?: Proposal
 }
 
 const votes = {
@@ -16,10 +18,30 @@ const votes = {
   abstain: 'abstain'
 }
 
-type FormData = ValidVotingSchemaType
+type FormData = {
+  comment: string
+  vote: 'for-vote' | 'against' | 'abstain'
+}
+
+function typeOfVoting(proposal: Proposal, voting: number, typeVoting: 'for-vote' | 'against' | 'abstain'): number {
+  let total = 0
+  switch (typeVoting) {
+    case votes.for:
+      total = proposal.voteFor + voting
+      break
+    case votes.against:
+      total = proposal.voteAgainst + voting
+      break
+    case votes.abstain:
+      total = proposal.voteAbstain + voting
+      break
+  }
+  return total
+}
 
 export default function ModalVoting(props: ModalVotingProps) {
-  const { setIsModalVoting } = props
+  const { setIsModalVoting, proposal } = props
+  const { metamaskCTX, votingPower, updateProposalMutation } = useProposal()
   const {
     handleSubmit,
     register,
@@ -31,13 +53,39 @@ export default function ModalVoting(props: ModalVotingProps) {
     },
     resolver: yupResolver(validVotingSchema)
   })
-
   const onSubmitVoting = handleSubmit((data) => {
     // setIsModalVoting(false)
-    console.log(data)
     // Call Api
+    // Call api get vote + voting power
+    if (proposal) {
+      const total = typeOfVoting(proposal, Number(votingPower), data.vote)
+      const params: UpdateProposalBody = {
+        comment: data.comment
+      }
+      console.log(params)
+      switch (data.vote) {
+        case votes.for:
+          params['voteFor'] = total
+          break
+        case votes.against:
+          params['voteAgainst'] = total
+          break
+        case votes.abstain:
+          params['voteAbstain'] = total
+          break
+      }
+      //Call api update
+      updateProposalMutation.mutate(
+        { id: proposal._id, body: params },
+        {
+          onSuccess: () => {
+            setIsModalVoting(false)
+          }
+        }
+      )
+    }
   })
-  console.log(errors)
+  console.log('render Modal voting')
 
   return (
     <>
@@ -61,8 +109,12 @@ export default function ModalVoting(props: ModalVotingProps) {
               <h2 className='text-center font-[ExtraBold] text-xl font-normal text-[#17f3dd]'>Voting</h2>
               <div className='mt-4 flex w-full flex-col rounded-2xl border-2 border-[#f67712] bg-[#1e2740] py-4'>
                 <div className='rounded-xl border border-[#1e2740] px-3'>
+                  <p className='mb-2 text-[#667085]'>Address</p>
+                  <p className='mb-2 text-lg text-white'>{metamaskCTX.wallet.accounts[0]}</p>
+                </div>
+                <div className='rounded-xl border border-[#1e2740] px-3'>
                   <p className='mb-2 text-[#667085]'>Voting power</p>
-                  <p className='mb-2 text-3xl text-white'>0</p>
+                  <p className='mb-2 text-3xl text-white'>{votingPower}</p>
                 </div>
                 <div className='m-0 h-[1px] w-full bg-[#f67712] p-0'></div>
                 <div className='mt-2 px-3'>
@@ -138,7 +190,24 @@ export default function ModalVoting(props: ModalVotingProps) {
                   </div>
                 </div>
                 <div className='px-3 py-3'>
-                  <Button kindButton='active' type='submit' className='btn-outline flex justify-center'>
+                  <Button
+                    kindButton='active'
+                    type='submit'
+                    className='btn-outline flex justify-center'
+                    isLoading={updateProposalMutation.isLoading}
+                    disabled={updateProposalMutation.isLoading}
+                    iconLoading={
+                      <svg
+                        viewBox='0 0 24 24'
+                        fill='#060818'
+                        width='20px'
+                        xmlns='http://www.w3.org/2000/svg'
+                        className='ml-1 h-5 w-5 animate-spin'
+                      >
+                        <path d='M12 6V7.79C12 8.24 12.54 8.46 12.85 8.14L15.64 5.35C15.84 5.15 15.84 4.84 15.64 4.64L12.85 1.85C12.54 1.54 12 1.76 12 2.21V4C7.58 4 4 7.58 4 12C4 13.04 4.2 14.04 4.57 14.95C4.84 15.62 5.7 15.8 6.21 15.29C6.48 15.02 6.59 14.61 6.44 14.25C6.15 13.56 6 12.79 6 12C6 8.69 8.69 6 12 6ZM17.79 8.71C17.52 8.98 17.41 9.4 17.56 9.75C17.84 10.45 18 11.21 18 12C18 15.31 15.31 18 12 18V16.21C12 15.76 11.46 15.54 11.15 15.86L8.36 18.65C8.16 18.85 8.16 19.16 8.36 19.36L11.15 22.15C11.46 22.46 12 22.24 12 21.8V20C16.42 20 20 16.42 20 12C20 10.96 19.8 9.96 19.43 9.05C19.16 8.38 18.3 8.2 17.79 8.71Z' />
+                      </svg>
+                    }
+                  >
                     Submit
                   </Button>
                 </div>

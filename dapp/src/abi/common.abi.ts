@@ -11,6 +11,8 @@ export interface AbiContractToken {
   allowance: (owner: string, spender: string) => Promise<string>
   decimals: () => number
   approve: (spender: string, amount: ethers.BigNumber) => Promise<ContractTransaction>
+  //DAO
+  getVotes: (address: string) => Promise<string>
 }
 
 export interface AbiContractStacking {
@@ -84,4 +86,10 @@ export const writeWithdraw = async (contractToken: ContractToken, contractStakin
 export const writeGetReward = async (contractStaking: ContractStaking) => {
   const rewardResult = await contractStaking.getReward()
   return rewardResult
+}
+
+// DAO
+export const readGetVotes = async (contractToken: ContractToken, address: string) => {
+  const getVotesResult = await contractToken.getVotes(address)
+  return formatEther(getVotesResult)
 }

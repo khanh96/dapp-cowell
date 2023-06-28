@@ -1,15 +1,16 @@
 import { Proposal } from 'src/types/proposal.type'
 import http from 'src/utils/http'
-import { SuccessResponseApi } from 'src/utils/utils.type'
 
 export type CreateProposalBody = {
   name: string
   description: string
 }
 
-export type CreateProposalBody = {
-  name: string
-  description: string
+export type UpdateProposalBody = {
+  comment: string
+  voteFor?: number
+  voteAgainst?: number
+  voteAbstain?: number
 }
 
 export type SuccessResponseProposal = {
@@ -31,10 +32,10 @@ export const proposalApi = {
   getProposal: (id: string) => {
     return http.get<Proposal>(`proposal/${id}`)
   },
-  createProposal: (params: CreateProposalBody) => {
-    return http.post<SuccessResponseProposal>(`proposal`, params)
+  createProposal: (body: CreateProposalBody) => {
+    return http.post<SuccessResponseProposal>(`proposal`, body)
   },
-  updateProposal: (params: any) => {
-    return http.post<SuccessResponseProposal>(`proposal/${params.id}`, params)
+  updateProposal: (id: string, body: UpdateProposalBody) => {
+    return http.put<SuccessResponseProposal>(`proposal/${id}`, body)
   }
 }
