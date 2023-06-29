@@ -5,13 +5,16 @@ import { CreateProposalBody, UpdateProposalBody, proposalApi } from 'src/apis/pr
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import { path } from 'src/constants/path'
-import { readGetVotes } from 'src/abi/common.abi'
+import { readGetVotes, writeDelegate } from 'src/abi/common.abi'
+import { transaction } from 'src/constants/transaction'
 
 export const useProposal = () => {
   const queryClient = useQueryClient()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [votingPower, setVotingPower] = useState<string>('')
   const metamaskCTX = useMetamask()
   const navigate = useNavigate()
+
   const { data: proposalData, refetch: proposalRefetch } = useQuery({
     queryKey: ['proposals'],
     queryFn: () => proposalApi.getProposals(),
@@ -48,6 +51,22 @@ export const useProposal = () => {
     proposalMutation.mutate(body)
   }
 
+  const delegate = async (address: string) => {
+    setIsLoading(true)
+    if (metamaskCTX.contractToken)
+      try {
+        const transactionWithDelegate = await writeDelegate(metamaskCTX.contractToken, address)
+        const resMetamask = await transactionWithDelegate.wait()
+        if (resMetamask.status === transaction.success) {
+          setIsLoading(false)
+        }
+        return resMetamask
+      } catch (error) {
+        console.log(error)
+        setIsLoading(false)
+      }
+  }
+
   useEffect(() => {
     const getVotes = async () => {
       if (metamaskCTX.contractToken) {
@@ -68,6 +87,8 @@ export const useProposal = () => {
     createProposal,
     updateProposalMutation,
     proposalMutation,
-    votingPower
+    votingPower,
+    delegate,
+    isLoading
   }
 }

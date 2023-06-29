@@ -77,7 +77,7 @@ function ButtonActive(props: ButtonActiveProps) {
 
   return (
     <button type={type} className={className} disabled={isLoading} {...rest}>
-      {isLoading && <div>{iconLoading}</div>}
+      {isLoading && <div className='flex items-center justify-center'>{iconLoading}</div>}
       {!isLoading && (
         <>
           {iconPosition === 'start' && icon && icon}

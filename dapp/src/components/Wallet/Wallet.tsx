@@ -25,7 +25,7 @@ export default function Wallet() {
           </div>
           <div className='mt-2 text-lg font-bold text-white'>
             <span>
-              {Number(userBalance).toFixed(4)} {tokenSymbol}
+              {Number(userBalance)} {tokenSymbol}
             </span>
           </div>
           <div className='mt-2 text-xs font-bold text-[#677395]'>

@@ -33,10 +33,10 @@ export default function Proposals() {
           <div className='flex items-center justify-end text-right font-medium text-white'>
             <div className='mr-5 flex items-center'>
               <span className='mr-2 text-sm text-[#677395]'>Voting power:</span>
-              <span className='text-xl'>0.0</span>
+              <span className='text-xl'>{votingPower}</span>
             </div>
             <div>
-              <Button kindButton='active' className='btn-primary w-fit' onClick={onClickDelegate}>
+              <Button kindButton='active' className='btn-primary w-fit text-sm' onClick={onClickDelegate}>
                 Delegate
               </Button>
             </div>

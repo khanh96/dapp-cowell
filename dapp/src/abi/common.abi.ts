@@ -13,6 +13,7 @@ export interface AbiContractToken {
   approve: (spender: string, amount: ethers.BigNumber) => Promise<ContractTransaction>
   //DAO
   getVotes: (address: string) => Promise<string>
+  delegate: (address: string) => Promise<ContractTransaction>
 }
 
 export interface AbiContractStacking {
@@ -92,4 +93,9 @@ export const writeGetReward = async (contractStaking: ContractStaking) => {
 export const readGetVotes = async (contractToken: ContractToken, address: string) => {
   const getVotesResult = await contractToken.getVotes(address)
   return formatEther(getVotesResult)
+}
+
+export const writeDelegate = async (contractToken: ContractToken, address: string) => {
+  const writeDelegateResult = await contractToken.delegate(address)
+  return writeDelegateResult
 }

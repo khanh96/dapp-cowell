@@ -1,3 +1,4 @@
+import { ethers } from 'ethers'
 import * as yup from 'yup'
 
 function testAmountMax(this: yup.TestContext<yup.AnyObject>) {
@@ -18,6 +19,10 @@ const testAllowanceStake = (value: string, ctx: yup.TestContext<yup.AnyObject>) 
   return true
 }
 
+const isValidAddressETH = (address: string) => {
+  return ethers.utils.isAddress(address)
+}
+
 export const stakingSchema = yup.object({
   amount: yup.string().required('Amount is required').test({
     name: 'amount-not-allowed',
@@ -35,7 +40,12 @@ export const proposalSchema = yup.object({
   name: yup.string().required('Title is required'),
   description: yup.string().required('Description is required'),
   vote: yup.string().required('Vote is required'),
-  comment: yup.string().required('Comment is required')
+  comment: yup.string().required('Comment is required'),
+  address: yup.string().required('Address is required').test({
+    name: 'validAddressETH',
+    test: isValidAddressETH,
+    message: 'Address ETH is invalid'
+  })
 })
 
 export const validAmountSchema = stakingSchema.pick(['amount'])
@@ -49,3 +59,6 @@ export type ValidVotingSchemaType = yup.InferType<typeof validVotingSchema>
 
 export const validProposalSchema = proposalSchema.pick(['name', 'description'])
 export type ValidProposalSchemaType = yup.InferType<typeof validProposalSchema>
+
+export const validDelegateSchema = proposalSchema.pick(['address'])
+export type ValidDelegateSchemaType = yup.InferType<typeof validDelegateSchema>
