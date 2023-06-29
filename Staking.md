@@ -33,3 +33,12 @@ Staking hoạt động đơn giản chỉ để giữ tiền trong ví phù hợ
 > Các rủi ro khi tham gia Staking
 - Đầu tiên trong suốt thời gian tham gia Staking thì lượng coin Stake sẽ bị khóa lại và bạn sẽ không thể thực hiện được hành động mua bán hoặc trading với lượng coin này.
 
+
+
+## Function 
+
+**stake**: Nhận vào amount là số tiền muốn gửi đặt cược.
+
+**withdraw**: Nhận vào amount là số tiền đã đặt cược.
+
+**getReward**: Rút hết số tiền thưởng được tính dựa trên số stake đã gửi vào.

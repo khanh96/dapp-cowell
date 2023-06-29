@@ -27,3 +27,12 @@ DAO hoạt động theo 2 loại hình chính, bao gồm: Token-based DAO và Sh
 
 
 **Tất công flash loan attack**
+
+
+### Function
+
+**delegate** => ủy quyền cho người khác voting. Số token nắm giữ sẽ là số voting power nếu delegate cho người khác.
+
+**getVote** => lấy số vote power dựa trên số token hiện có trong ví.
+
+
