@@ -63,8 +63,8 @@
    - Dùng address mới để connect lại tới contract và thực thi function mong muốn.
 
 
-
-
+## EtherJs
+- `Web3Provider` được sử dụng khi bạn muốn tương tác với Ethereum thông qua trình duyệt web có cài đặt **Web3 như MetaMask**, trong khi `StaticJsonRpcProvider` được sử dụng khi bạn muốn **tương tác trực tiếp với một nút Ethereum RPC thông qua URL chỉ định**.
 
 
 ### Function
