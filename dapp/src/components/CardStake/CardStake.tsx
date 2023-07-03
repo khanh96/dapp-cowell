@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Button from '../Button'
 import ModalStartStaking from '../ModalStartStaking'
 import useStaking from 'src/utils/hooks/useStaking'
@@ -8,6 +8,7 @@ import { BigNumber } from 'ethers'
 import useMetamask from 'src/utils/hooks/useMetamask'
 import { readTotalSupply } from 'src/abi/common.abi'
 import logoCoin from 'src/assets/images/logo-cw.png'
+import ModalStakingWithoutApprove from '../ModalStakingWithoutApprove'
 
 export default function CardStake() {
   const funcOpenModalRef = useRef<{ openModal: () => void; getReward: () => void }>({
@@ -17,7 +18,7 @@ export default function CardStake() {
   const { stakingBalance, tokenSymbol, totalSupply, earnedTokens, contractStaking, setTotalSupply } = useMetamask()
   const { isLoadingClaimReward, setIsOpenModalUnStaking, isOpenModalUnStaking, withdraw, isLoadingUnstaking } =
     useStaking()
-
+  const [isOpenModalStakingWithoutApprove, setIsOpenModalStakingWithoutApprove] = useState(false)
   const onClickStartStaking = () => {
     funcOpenModalRef.current.openModal()
   }
@@ -29,6 +30,11 @@ export default function CardStake() {
   const onClickClaimReward = () => {
     console.log('Claim Rewards')
     funcOpenModalRef.current.getReward()
+  }
+
+  const onClickStakingWithoutApprove = () => {
+    console.log('adada')
+    setIsOpenModalStakingWithoutApprove(true)
   }
 
   const isDisableBtnClaimReward = useMemo(() => {
@@ -104,6 +110,11 @@ export default function CardStake() {
                   Unstaking
                 </Button>
               </div>
+              <div className='w-full'>
+                <Button kindButton='active' onClick={onClickStakingWithoutApprove} className='btn-outline mt-4 w-full'>
+                  Staking without approve
+                </Button>
+              </div>
             </div>
             <div className='m-0 h-[1px] w-full bg-[#1e2740] p-0 md:hidden'></div>
             <div className='flex w-full flex-col items-center px-5 py-5'>
@@ -142,6 +153,9 @@ export default function CardStake() {
         </div>
       </div>
       <ModalStartStaking ref={funcOpenModalRef} />
+      {isOpenModalStakingWithoutApprove && (
+        <ModalStakingWithoutApprove closeModal={() => setIsOpenModalStakingWithoutApprove(false)} />
+      )}
       {isOpenModalUnStaking && (
         <ModalUnStaking
           closeModalUnStaking={() => setIsOpenModalUnStaking(false)}

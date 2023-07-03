@@ -46,8 +46,10 @@ interface MetaMaskContextData {
   isConnecting: boolean
   connectMetaMask: () => void
   clearError: () => void
-  addChain: (parameters: AddEthereumChainParameter) => Promise<void>
-  switchChain: (chainId: string) => Promise<void>
+  addChain: (parameters: AddEthereumChainParameter) => void
+  switchChain: (chainId: string) => void
+  signer: ethers.providers.JsonRpcSigner | null
+  provider: ethers.providers.Web3Provider
 }
 
 const initialWalletState = {
@@ -75,12 +77,17 @@ export const initialMetamaskContext: MetaMaskContextData & MetamaskContextInterf
   clearError: () => null,
   disconnectWallet: () => null,
   contractToken: null,
-  contractStaking: null
+  contractStaking: null,
+  addChain: () => null,
+  switchChain: () => null,
+  signer: null
 }
 
 export const disconnectedState: WalletState = { accounts: [], balance: '', chainId: '' }
 
-export const MetamaskContext = React.createContext<MetaMaskContextData & MetamaskContextInterface>({})
+export const MetamaskContext = React.createContext<MetaMaskContextData & MetamaskContextInterface>(
+  initialMetamaskContext
+)
 
 function getMetaMaskProvider() {
   const ethereum = window.ethereum
@@ -156,6 +163,8 @@ export const MetamaskContextProvider = ({
   const [contractStaking, setContractStaking] = useState<(ethers.Contract & ContractStaking) | null>(
     defaultValue.contractStaking
   )
+  const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner | null>(null)
+  const [provider] = useState<ethers.providers.Web3Provider>(new ethers.providers.Web3Provider(getMetaMaskProvider()))
   const [stakingBalance, setStakingBalance] = useState<string>(defaultValue.stakingBalance)
   const [totalSupply, setTotalSupply] = useState<string>(defaultValue.totalSupply)
   const [earnedTokens, setEarnedTokens] = useState<string>(defaultValue.earnedTokens)
@@ -251,6 +260,10 @@ export const MetamaskContextProvider = ({
         newAccount
       ) as ContractStaking
       const contractStakingWithSigner = contractStakingCowell.connect(newAccount) as ContractStaking
+
+      // Ký với account ethereum
+      setSigner(newAccount)
+      // Ký với account ethereum
       setContractToken(contractTokenCowell)
       setContractStaking(contractStakingWithSigner)
       try {
@@ -287,6 +300,7 @@ export const MetamaskContextProvider = ({
   useEffect(() => {
     if (wallet.accounts[0]) {
       const web3Provider = new ethers.providers.Web3Provider(window.ethereum)
+
       web3Provider.send('eth_requestAccounts', []).then(async () => {
         await accountChangedHandler(web3Provider.getSigner())
       })
@@ -317,7 +331,7 @@ export const MetamaskContextProvider = ({
 
   const value = React.useMemo(
     () => ({
-      // ---staking
+      // ---staking, token
       errorMessage,
       setErrorMessage,
       setUserBalance,
@@ -339,7 +353,9 @@ export const MetamaskContextProvider = ({
       clearError,
       disconnectWallet,
       addChain,
-      switchChain
+      switchChain,
+      signer,
+      provider
     }),
     [
       errorMessage,
@@ -362,7 +378,9 @@ export const MetamaskContextProvider = ({
       clearError,
       disconnectWallet,
       addChain,
-      switchChain
+      switchChain,
+      signer,
+      provider
     ]
   )
 

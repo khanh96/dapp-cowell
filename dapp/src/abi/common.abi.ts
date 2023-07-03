@@ -11,6 +11,24 @@ export interface AbiContractToken {
   allowance: (owner: string, spender: string) => Promise<string>
   decimals: () => number
   approve: (spender: string, amount: ethers.BigNumber) => Promise<ContractTransaction>
+  nonces: (address: string) => Promise<any>
+  name: () => Promise<string>
+  permit: (
+    owner: string,
+    spender: string,
+    value: ethers.BigNumber,
+    deadline: number,
+    v: number,
+    r: string,
+    s: string,
+    objGas: { gasPrice: ethers.BigNumber; gasLimit: number }
+  ) => Promise<ContractTransaction>
+  transferFrom: (
+    from: string,
+    to: string,
+    amount: ethers.BigNumber,
+    objGas: { gasPrice: ethers.BigNumber; gasLimit: number }
+  ) => Promise<ContractTransaction>
   //DAO
   getVotes: (address: string) => Promise<string>
   delegate: (address: string) => Promise<ContractTransaction>
@@ -87,6 +105,48 @@ export const writeWithdraw = async (contractToken: ContractToken, contractStakin
 export const writeGetReward = async (contractStaking: ContractStaking) => {
   const rewardResult = await contractStaking.getReward()
   return rewardResult
+}
+export const readNonces = async (contractToken: ContractToken, address: string) => {
+  const noncesResult = await contractToken.nonces(address)
+  return noncesResult
+}
+
+export const readName = async (contractToken: ContractToken) => {
+  const nameResult = await contractToken.name()
+  return nameResult
+}
+export const writePermit = async (
+  contractToken: ContractToken,
+  owner: string,
+  spender: string,
+  value: ethers.BigNumber,
+  deadline: number,
+  v: number,
+  r: string,
+  s: string,
+  objGas: { gasPrice: ethers.BigNumber; gasLimit: number }
+) => {
+  const objectGas = {
+    gasPrice: objGas.gasPrice,
+    gasLimit: objGas.gasLimit
+  }
+  const permitResult = await contractToken.permit(owner, spender, value, deadline, v, r, s, objectGas)
+  return permitResult
+}
+
+export const writeTransferFrom = async (
+  contractToken: ContractToken,
+  from: string,
+  to: string,
+  amount: ethers.BigNumber,
+  objGas: { gasPrice: ethers.BigNumber; gasLimit: number }
+) => {
+  const objectGas = {
+    gasPrice: objGas.gasPrice,
+    gasLimit: objGas.gasLimit
+  }
+  const transferFromResult = await contractToken.transferFrom(from, to, amount, objectGas)
+  return transferFromResult
 }
 
 // DAO

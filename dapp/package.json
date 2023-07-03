@@ -10,7 +10,8 @@
     "lint:fix": "eslint --fix --ext ts,tsx src/",
     "prettier": "prettier --check \"src/**/(*.tsx|*.ts|*.css|*.scss)\"",
     "prettier:fix": "prettier --write \"src/**/(*.tsx|*.ts|*.css|*.scss)\"",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@floating-ui/react": "^0.24.2",
@@ -57,6 +58,7 @@
     "ethers": "5.7.2",
     "i18next": "^22.5.1",
     "moment": "^2.29.4",
+    "patch-package": "^7.0.0",
     "postcss": "^8.4.24",
     "prettier": "^2.8.8",
     "prettier-plugin-tailwindcss": "^0.3.0",
