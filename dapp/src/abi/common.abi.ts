@@ -1,4 +1,4 @@
-import type { ethers } from 'ethers'
+import type { ethers, Bytes } from 'ethers'
 import { formatEther, parseUnits } from 'src/utils/utils'
 import type { ContractTransaction } from 'ethers/src.ts'
 export interface TransactionData {
@@ -43,8 +43,19 @@ export interface AbiContractStacking {
   getReward: () => Promise<ContractTransaction>
 }
 
+export interface AbiContractDao {
+  propose: (
+    targets: string[],
+    values: number[],
+    calldatas: string[],
+    description: string
+  ) => Promise<ContractTransaction>
+  queue: (targets: string[], values: number[], calldatas: string[], description: any) => Promise<ContractTransaction>
+}
+
 export type ContractToken = AbiContractToken & ethers.Contract
 export type ContractStaking = AbiContractStacking & ethers.Contract
+export type ContractDao = AbiContractDao & ethers.Contract
 
 export const readTokenSymbol = async (contractToken: ContractToken): Promise<string> => {
   const tokenSymbol = await contractToken.symbol()
@@ -158,4 +169,26 @@ export const readGetVotes = async (contractToken: ContractToken, address: string
 export const writeDelegate = async (contractToken: ContractToken, address: string) => {
   const writeDelegateResult = await contractToken.delegate(address)
   return writeDelegateResult
+}
+
+export const writePropose = async (
+  contractDao: ContractDao,
+  targets: string[],
+  values: number[],
+  calldatas: string[],
+  description: string
+) => {
+  const writeProposeResult = await contractDao.propose(targets, values, calldatas, description)
+  return writeProposeResult
+}
+
+export const writeQueue = async (
+  contractDao: ContractDao,
+  targets: string[],
+  values: number[],
+  calldatas: string[],
+  description: any
+) => {
+  const writeQueueResult = await contractDao.queue(targets, values, calldatas, description)
+  return writeQueueResult
 }

@@ -2,6 +2,7 @@ import { Proposal } from 'src/types/proposal.type'
 import http from 'src/utils/http'
 
 export type CreateProposalBody = {
+  proposal_id: string
   name: string
   description: string
 }

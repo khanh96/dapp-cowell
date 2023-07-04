@@ -1,17 +1,24 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import useMetamask from './useMetamask'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CreateProposalBody, UpdateProposalBody, proposalApi } from 'src/apis/proposal.api'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import { path } from 'src/constants/path'
-import { readGetVotes, writeDelegate } from 'src/abi/common.abi'
+import { readGetVotes, writeDelegate, writePropose, writeQueue } from 'src/abi/common.abi'
 import { transaction } from 'src/constants/transaction'
+import { ethers } from 'ethers'
+import { keccak256, toUtf8Bytes } from '../utils'
 
 export const useProposal = () => {
   const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [votingPower, setVotingPower] = useState<string>('')
+  const [formDataProposal, setFormDataProposal] = useState<CreateProposalBody>({
+    proposal_id: '',
+    name: '',
+    description: ''
+  })
   const metamaskCTX = useMetamask()
   const navigate = useNavigate()
 
@@ -20,6 +27,7 @@ export const useProposal = () => {
     queryFn: () => proposalApi.getProposals(),
     staleTime: 2 * 60 * 1000
   })
+  console.log('useProposal')
 
   const updateProposalMutation = useMutation({
     mutationFn: ({ id, body }: { id: string; body: UpdateProposalBody }) => {
@@ -47,9 +55,86 @@ export const useProposal = () => {
     }
   })
 
-  const createProposal = (body: CreateProposalBody) => {
-    proposalMutation.mutate(body)
+  const queue = useCallback(
+    async (descriptionHash: any) => {
+      const { contractToken, contractDao, wallet } = metamaskCTX
+      if (contractToken && contractDao) {
+        const transactionQueue = await writeQueue(
+          contractDao,
+          [contractToken.address],
+          [0],
+          ['0x42966c68000000000000000000000000000000000000000000000000000000000000000a'],
+          descriptionHash
+        )
+        transactionQueue.wait().then((res) => {
+          console.log('success=>', res.status)
+        })
+      }
+    },
+    [metamaskCTX]
+  )
+
+  const createProposal = async (body: CreateProposalBody) => {
+    console.log('votingPower', votingPower)
+    const { contractToken, contractDao, wallet } = metamaskCTX
+
+    const params = {
+      target: [contractToken?.address],
+      value: [0],
+      calldatas: ['0x42966c68000000000000000000000000000000000000000000000000000000000000000a'],
+      desc: body.description
+    }
+
+    if (Number(votingPower) > 0 && contractDao && contractToken) {
+      const transactionPropose = await writePropose(
+        contractDao,
+        [contractToken.address],
+        [0],
+        ['0x42966c68000000000000000000000000000000000000000000000000000000000000000a'],
+        body.description
+      )
+      console.log('transactionPropose=>', transactionPropose)
+      const res = await transactionPropose.wait()
+      if (res && res.status === transaction.success) {
+        // success transaction proposal
+        setFormDataProposal(body)
+      }
+    }
   }
+
+  useEffect(() => {
+    metamaskCTX.contractDao?.on(
+      'ProposalCreated',
+      (proposalId, proposer, targets, values, signatures, calldatas, voteStart, voteEnd, description) => {
+        const desc = keccak256(toUtf8Bytes(description))
+        if (proposalId) {
+          console.log(formDataProposal)
+          const body = {
+            ...formDataProposal,
+            proposal_id: proposalId._hex
+          }
+          proposalMutation.mutate(body, {
+            // Call ABI queue
+            onSuccess: () => {
+              queue(desc)
+            }
+          })
+        }
+
+        // console.log('proposer=>', proposer)
+        // console.log('targets=>', targets)
+        // console.log('values=>', values)
+        // console.log('calldatas=>', calldatas)
+        // console.log('voteStart=>', voteStart)
+        // console.log('voteEnd=>', voteEnd)
+        // console.log('description=>', description)
+      }
+    )
+
+    return () => {
+      metamaskCTX.contractDao?.removeAllListeners('ProposalCreated')
+    }
+  }, [metamaskCTX.contractDao, formDataProposal, proposalMutation, queue])
 
   const delegate = async (address: string) => {
     setIsLoading(true)

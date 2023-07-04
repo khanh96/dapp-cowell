@@ -3,8 +3,10 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { formatEther } from 'src/utils/utils'
 import ERC20_ABI_TOKEN from '../abi/ERC20_ABI_TOKEN.json'
 import ERC20_ABI_STAKING from '../abi/ERC20_ABI_STAKING.json'
+import ERC20_ABI_DAO from '../abi/ERC20_ABI_DAO.json'
 import detectEthereumProvider from '@metamask/detect-provider'
 import {
+  ContractDao,
   ContractStaking,
   ContractToken,
   readBalanceOfContract,
@@ -23,6 +25,7 @@ interface MetamaskContextInterface {
   tokenSymbol: string
   contractToken: (ethers.Contract & ContractToken) | null
   contractStaking: (ethers.Contract & ContractStaking) | null
+  contractDao: (ethers.Contract & ContractDao) | null
   // setContractStaking: React.Dispatch<React.SetStateAction<ethers.Contract & ContractStaking>>
   stakingBalance: string
   setStakingBalance: React.Dispatch<React.SetStateAction<string>>
@@ -78,6 +81,7 @@ export const initialMetamaskContext: MetaMaskContextData & MetamaskContextInterf
   disconnectWallet: () => null,
   contractToken: null,
   contractStaking: null,
+  contractDao: null,
   addChain: () => null,
   switchChain: () => null,
   signer: null
@@ -163,6 +167,8 @@ export const MetamaskContextProvider = ({
   const [contractStaking, setContractStaking] = useState<(ethers.Contract & ContractStaking) | null>(
     defaultValue.contractStaking
   )
+  const [contractDao, setContractDao] = useState<(ethers.Contract & ContractDao) | null>(defaultValue.contractDao)
+
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner | null>(null)
   const [provider] = useState<ethers.providers.Web3Provider>(new ethers.providers.Web3Provider(getMetaMaskProvider()))
   const [stakingBalance, setStakingBalance] = useState<string>(defaultValue.stakingBalance)
@@ -259,13 +265,20 @@ export const MetamaskContextProvider = ({
         ERC20_ABI_STAKING,
         newAccount
       ) as ContractStaking
+      const contractDaoCowell = new ethers.Contract(
+        import.meta.env.VITE_CONTRACT_DAO,
+        ERC20_ABI_DAO,
+        newAccount
+      ) as ContractDao
       const contractStakingWithSigner = contractStakingCowell.connect(newAccount) as ContractStaking
+      const contractDaoWithSigner = contractDaoCowell.connect(newAccount) as ContractDao
 
       // Ký với account ethereum
       setSigner(newAccount)
       // Ký với account ethereum
       setContractToken(contractTokenCowell)
       setContractStaking(contractStakingWithSigner)
+      setContractDao(contractDaoWithSigner)
       try {
         const tokenSymbol = await readTokenSymbol(contractTokenCowell)
         const tokenBalanceOfContract = await readBalanceOfContract(
@@ -339,6 +352,7 @@ export const MetamaskContextProvider = ({
       tokenSymbol,
       contractToken,
       contractStaking,
+      contractDao,
       stakingBalance,
       setStakingBalance,
       totalSupply,
@@ -365,6 +379,7 @@ export const MetamaskContextProvider = ({
       tokenSymbol,
       contractToken,
       contractStaking,
+      contractDao,
       stakingBalance,
       setStakingBalance,
       totalSupply,

@@ -15,6 +15,7 @@ interface ImportMetaEnv {
   VITE_PRIVATE_KEY_ACCOUNT_2: string
   VITE_CONTRACT_TOKEN_COWELL: string
   VITE_CONTRACT_STAKING: string
+  VITE_CONTRACT_DAO: string
 }
 
 interface ImportMeta {
