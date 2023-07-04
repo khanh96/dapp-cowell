@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom'
 import { path } from 'src/constants/path'
 import { readGetVotes, writeDelegate, writePropose, writeQueue } from 'src/abi/common.abi'
 import { transaction } from 'src/constants/transaction'
-import { ethers } from 'ethers'
 import { keccak256, toUtf8Bytes } from '../utils'
 
 export const useProposal = () => {
@@ -56,8 +55,15 @@ export const useProposal = () => {
   })
 
   const queue = useCallback(
-    async (descriptionHash: any) => {
+    async (descriptionHash: string) => {
       const { contractToken, contractDao, wallet } = metamaskCTX
+      console.log(
+        'data-queue',
+        [contractToken?.address],
+        [0],
+        ['0x42966c68000000000000000000000000000000000000000000000000000000000000000a'],
+        descriptionHash
+      )
       if (contractToken && contractDao) {
         const transactionQueue = await writeQueue(
           contractDao,
@@ -107,12 +113,14 @@ export const useProposal = () => {
       'ProposalCreated',
       (proposalId, proposer, targets, values, signatures, calldatas, voteStart, voteEnd, description) => {
         const desc = keccak256(toUtf8Bytes(description))
+        const proposal_id = BigInt(proposalId._hex).toString()
         if (proposalId) {
           console.log(formDataProposal)
           const body = {
             ...formDataProposal,
-            proposal_id: proposalId._hex
+            proposal_id: proposal_id
           }
+          console.log('body', body)
           proposalMutation.mutate(body, {
             // Call ABI queue
             onSuccess: () => {
@@ -120,7 +128,7 @@ export const useProposal = () => {
             }
           })
         }
-
+        // console.log('proposalId=>', proposalId)
         // console.log('proposer=>', proposer)
         // console.log('targets=>', targets)
         // console.log('values=>', values)
