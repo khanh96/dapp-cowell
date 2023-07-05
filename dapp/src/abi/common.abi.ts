@@ -50,7 +50,23 @@ export interface AbiContractDao {
     calldatas: string[],
     description: string
   ) => Promise<ContractTransaction>
-  queue: (targets: string[], values: number[], calldatas: string[], description: any) => Promise<ContractTransaction>
+  queue: (targets: string[], values: number[], calldatas: string[], description: string) => Promise<ContractTransaction>
+  castVote: (proposalId: string, support: number) => Promise<ContractTransaction>
+  cancel: (
+    targets: string[],
+    values: number[],
+    calldatas: string[],
+    descriptionHash: string
+  ) => Promise<ContractTransaction>
+  execute: (
+    payableAmount: string[],
+    targets: number[],
+    values: string[],
+    calldatas: string[],
+    descriptionHash: string
+  ) => Promise<ContractTransaction>
+  state: (proposalId: string) => Promise<number>
+  proposalVotes: (proposalId: string) => Promise<{ againstVotes: number; forVotes: number; abstainVotes: number }>
 }
 
 export type ContractToken = AbiContractToken & ethers.Contract
@@ -160,7 +176,7 @@ export const writeTransferFrom = async (
   return transferFromResult
 }
 
-// DAO
+// DAO - Governor
 export const readGetVotes = async (contractToken: ContractToken, address: string) => {
   const getVotesResult = await contractToken.getVotes(address)
   return formatEther(getVotesResult)
@@ -187,8 +203,44 @@ export const writeQueue = async (
   targets: string[],
   values: number[],
   calldatas: string[],
-  description: any
+  descriptionHash: string
 ) => {
-  const writeQueueResult = await contractDao.queue(targets, values, calldatas, description)
+  const writeQueueResult = await contractDao.queue(targets, values, calldatas, descriptionHash)
   return writeQueueResult
+}
+export const writeCastVote = async (contractDao: ContractDao, proposalId: string, support: number) => {
+  const writeCastVoteResult = await contractDao.castVote(proposalId, support)
+  return writeCastVoteResult
+}
+
+export const writeCancel = async (
+  contractDao: ContractDao,
+  targets: string[],
+  values: number[],
+  calldatas: string[],
+  descriptionHash: string
+) => {
+  const writeCancelResult = await contractDao.cancel(targets, values, calldatas, descriptionHash)
+  return writeCancelResult
+}
+
+export const writeExecute = async (
+  contractDao: ContractDao,
+  payableAmount: string[],
+  targets: number[],
+  values: string[],
+  calldatas: string[],
+  descriptionHash: string
+) => {
+  const writeExecuteResult = await contractDao.execute(payableAmount, targets, values, calldatas, descriptionHash)
+  return writeExecuteResult
+}
+
+export const readState = async (contractDao: ContractDao, proposalId: string) => {
+  const stateVoteResult = await contractDao.state(proposalId)
+  return stateVoteResult
+}
+export const readProposalVotes = async (contractDao: ContractDao, proposalId: string) => {
+  const voteResult = await contractDao.proposalVotes(proposalId)
+  return voteResult
 }

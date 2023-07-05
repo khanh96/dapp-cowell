@@ -3,7 +3,7 @@ import Button from 'src/components/Button'
 import ModalDelegate from 'src/components/ModalDelegate'
 import { path } from 'src/constants/path'
 import useModal from 'src/utils/hooks/useModal'
-import { useProposal } from 'src/utils/hooks/useProposal'
+import { StateProposal, useProposal } from 'src/utils/hooks/useProposal'
 import { calculatePercent, formatDotAccount } from 'src/utils/utils'
 export default function Proposals() {
   const { proposalData, metamaskCTX, votingPower } = useProposal()
@@ -14,6 +14,7 @@ export default function Proposals() {
     // Call smart contract delegate
     openModal()
   }
+
   return (
     <main className='container max-w-[960px]'>
       <section>
@@ -85,7 +86,59 @@ export default function Proposals() {
                       proposal.voteFor !== 0 && proposal.voteAgainst !== 0
                         ? calculatePercent(proposal.voteAgainst, totalVote)
                         : 0
-
+                    const renderStateProposal = () => {
+                      switch (proposal.state) {
+                        case StateProposal.Active:
+                          return (
+                            <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>
+                              Active
+                            </span>
+                          )
+                        case StateProposal.Canceled:
+                          return (
+                            <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>
+                              Canceled
+                            </span>
+                          )
+                        case StateProposal.Defeated:
+                          return (
+                            <span className='mb-4 bg-[#ffe6e7] p-1 text-xs font-bold uppercase text-[#F44061]'>
+                              Defeated
+                            </span>
+                          )
+                        case StateProposal.Executed:
+                          return (
+                            <span className='mb-4 bg-[#D9FFFB] p-1 text-xs font-bold uppercase text-[#00BFAF]'>
+                              Executed
+                            </span>
+                          )
+                        case StateProposal.Expired:
+                          return (
+                            <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>
+                              Expired
+                            </span>
+                          )
+                        case StateProposal.Pending:
+                          return (
+                            <span className='bg-[#D9FFFB] p-1 text-xs font-bold uppercase text-[#00BFAF]'>Pending</span>
+                          )
+                        case StateProposal.Queued:
+                          return (
+                            <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>
+                              Queued
+                            </span>
+                          )
+                        case StateProposal.Succeeded:
+                          return (
+                            <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>
+                              Succeeded
+                            </span>
+                          )
+                        default:
+                          break
+                      }
+                      return ''
+                    }
                     return (
                       <tr className='border border-[#1e2740]' key={proposal._id}>
                         <td className='px-4 py-4'>
@@ -103,9 +156,7 @@ export default function Proposals() {
                                 {proposal.name}
                               </Link>
                               <div className='flex items-center'>
-                                <span className='bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>
-                                  Active
-                                </span>
+                                {renderStateProposal()}
                                 <p className='ml-2 text-sm text-[#667085]'> Proposed on: {proposal.create_at}</p>
                               </div>
                             </div>

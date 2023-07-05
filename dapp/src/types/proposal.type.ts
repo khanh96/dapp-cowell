@@ -6,4 +6,6 @@ export interface Proposal {
   voteAgainst: number
   voteAbstain: number
   create_at: string
+  state: number
+  proposal_id: string
 }

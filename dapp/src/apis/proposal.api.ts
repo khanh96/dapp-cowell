@@ -8,10 +8,11 @@ export type CreateProposalBody = {
 }
 
 export type UpdateProposalBody = {
-  comment: string
+  comment?: string
   voteFor?: number
   voteAgainst?: number
   voteAbstain?: number
+  state: number
 }
 
 export type SuccessResponseProposal = {

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Button from 'src/components/Button'
 import ModalVoting from 'src/components/ModalVoting'
 import Tabs from 'src/components/Tabs'
@@ -7,10 +7,12 @@ import HighchartsReact from 'highcharts-react-official'
 import { useQuery } from '@tanstack/react-query'
 import { proposalApi } from 'src/apis/proposal.api'
 import { useParams } from 'react-router-dom'
-import { calculatePercent } from 'src/utils/utils'
+import { calculatePercent, formatDotAccount } from 'src/utils/utils'
+import { StateProposal, useProposal } from 'src/utils/hooks/useProposal'
 
 export default function ProposalDetail() {
   const chartComponentRef = useRef<HighchartsReact.RefObject>(null)
+  const { handleState, queue } = useProposal()
   const [isModalVoting, setIsModalVoting] = useState(false)
   const { proposalId } = useParams()
   const { data: proposalDetail, isLoading } = useQuery({
@@ -70,6 +72,104 @@ export default function ProposalDetail() {
     }
   }, [proposalDetail?.data.voteAgainst, proposalDetail?.data.voteFor, proposalDetail?.data.voteAbstain])
 
+  useEffect(() => {
+    if (
+      proposalDetail?.data.state === StateProposal.Defeated ||
+      proposalDetail?.data.state === StateProposal.Canceled ||
+      proposalDetail?.data.state === StateProposal.Expired ||
+      proposalDetail?.data.state === StateProposal.Canceled
+    ) {
+      console.log('NO CALL TIMEOUT ----')
+      return
+    }
+
+    const timeoutId = setTimeout(() => {
+      console.log('CALL TIMEOUT -----')
+      if (proposalDetail?.data.proposal_id) {
+        handleState(proposalDetail.data, proposalDetail?.data.proposal_id)
+      }
+    }, 2 * 60 * 1000)
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [proposalDetail?.data.proposal_id, handleState, proposalDetail?.data])
+
+  const renderStateProposal = () => {
+    switch (proposalDetail?.data.state) {
+      case StateProposal.Active:
+        return <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>Active</span>
+      case StateProposal.Canceled:
+        return <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>Canceled</span>
+      case StateProposal.Defeated:
+        return <span className='mb-4 bg-[#ffe6e7] p-1 text-xs font-bold uppercase text-[#F44061]'>Defeated</span>
+      case StateProposal.Executed:
+        return <span className='mb-4 bg-[#D9FFFB] p-1 text-xs font-bold uppercase text-[#00BFAF]'>Executed</span>
+      case StateProposal.Expired:
+        return <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>Expired</span>
+      case StateProposal.Pending:
+        return <span className='mb-4 bg-[#D9FFFB] p-1 text-xs font-bold uppercase text-[#00BFAF]'>Pending</span>
+      case StateProposal.Queued:
+        return <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>Queued</span>
+      case StateProposal.Succeeded:
+        return <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>Succeeded</span>
+      default:
+        break
+    }
+    return ''
+  }
+  const renderBtnStateProposal = () => {
+    switch (proposalDetail?.data.state) {
+      case StateProposal.Active:
+        return (
+          <Button kindButton='active' className='btn-primary w-fit' onClick={() => setIsModalVoting(true)}>
+            Vote on-chain
+          </Button>
+        )
+      case StateProposal.Canceled:
+        return <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>Canceled</span>
+      case StateProposal.Defeated:
+        return (
+          <Button kindButton='active' className='btn-primary w-fit' onClick={() => setIsModalVoting(true)}>
+            Defeated
+          </Button>
+        )
+      case StateProposal.Executed:
+        return (
+          <Button kindButton='active' className='btn-primary w-fit' onClick={() => setIsModalVoting(true)}>
+            Executed
+          </Button>
+        )
+      case StateProposal.Expired:
+        return (
+          <Button kindButton='active' className='btn-primary w-fit' onClick={() => setIsModalVoting(true)}>
+            Expired
+          </Button>
+        )
+      case StateProposal.Queued:
+        return (
+          <Button
+            kindButton='active'
+            className='btn-primary w-fit'
+            onClick={() => queue(proposalDetail.data.description)}
+          >
+            Queued
+          </Button>
+        )
+      case StateProposal.Succeeded:
+        return (
+          <Button
+            kindButton='active'
+            className='btn-primary w-fit'
+            onClick={() => queue(proposalDetail.data.description)}
+          >
+            Succeeded
+          </Button>
+        )
+      default:
+        break
+    }
+  }
+
   return (
     <main className='container max-w-[1024px]'>
       {proposalDetail?.data && (
@@ -77,15 +177,16 @@ export default function ProposalDetail() {
           <div className='mt-10'>
             <div className=' rounded-xl border border-[#1e2740] '>
               <div className='p-5'>
-                <span className='mb-4 bg-[#ebe5ff] p-1 text-xs font-bold uppercase text-[#7d33fa]'>Active</span>
-                <div className='flex items-center justify-center'>
+                {renderStateProposal()}
+                <div className='flex items-center justify-between'>
                   <h2 className='py-4 text-left text-3xl font-medium text-white'>
                     [UPDATED] AIP-1.1 - Lockup, Budget, Transparency
                   </h2>
                   <div className='ml-10 flex-shrink-0'>
-                    <Button kindButton='active' className='btn-primary w-fit' onClick={() => setIsModalVoting(true)}>
+                    {/* <Button kindButton='active' className='btn-primary w-fit' onClick={() => setIsModalVoting(true)}>
                       Vote on-chain
-                    </Button>
+                    </Button> */}
+                    {renderBtnStateProposal()}
                   </div>
                 </div>
               </div>
@@ -100,7 +201,9 @@ export default function ProposalDetail() {
                 </div>
                 <span className='mr-3 text-sm text-[#667085]'>delegate.l2beat.eth</span>
                 <div className='mr-3 h-1 w-1 rounded-full bg-white'></div>
-                <span className='mr-3 text-sm text-[#667085]'>ID 705456...2480</span>
+                <span className='mr-3 text-sm text-[#667085]'>
+                  ID {formatDotAccount(proposalDetail.data.proposal_id)}
+                </span>
                 <div className='mr-3 h-1 w-1 rounded-full bg-white'></div>
                 <span className='mr-3 text-sm text-[#667085]'>Proposed on: {proposalDetail?.data.create_at}</span>
               </div>

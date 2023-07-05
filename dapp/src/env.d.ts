@@ -16,6 +16,7 @@ interface ImportMetaEnv {
   VITE_CONTRACT_TOKEN_COWELL: string
   VITE_CONTRACT_STAKING: string
   VITE_CONTRACT_DAO: string
+  VITE_CONTRACT_PROPOSAL: string
 }
 
 interface ImportMeta {

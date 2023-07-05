@@ -11,11 +11,15 @@ interface ModalVotingProps {
   setIsModalVoting: (isOpen: boolean) => void
   proposal?: Proposal
 }
-
+enum VoteType {
+  Against,
+  For,
+  Abstain
+}
 const votes = {
-  for: 'for-vote',
   against: 'against',
-  abstain: 'abstain'
+  abstain: 'abstain',
+  for: 'for-vote'
 }
 
 type FormData = {
@@ -41,7 +45,7 @@ function typeOfVoting(proposal: Proposal, voting: number, typeVoting: 'for-vote'
 
 export default function ModalVoting(props: ModalVotingProps) {
   const { setIsModalVoting, proposal } = props
-  const { metamaskCTX, votingPower, updateProposalMutation } = useProposal()
+  const { metamaskCTX, votingPower, updateProposalMutation, castVote } = useProposal()
   const {
     handleSubmit,
     register,
@@ -54,6 +58,7 @@ export default function ModalVoting(props: ModalVotingProps) {
     resolver: yupResolver(validVotingSchema)
   })
   const onSubmitVoting = handleSubmit((data) => {
+    let support: VoteType = VoteType.Abstain
     // setIsModalVoting(false)
     // Call Api
     // Call api get vote + voting power
@@ -62,27 +67,31 @@ export default function ModalVoting(props: ModalVotingProps) {
       const params: UpdateProposalBody = {
         comment: data.comment
       }
-      console.log(params)
       switch (data.vote) {
         case votes.for:
           params['voteFor'] = total
+          support = VoteType.For
           break
         case votes.against:
           params['voteAgainst'] = total
+          support = VoteType.Against
           break
         case votes.abstain:
           params['voteAbstain'] = total
+          support = VoteType.Abstain
           break
       }
+      castVote(proposal.proposal_id, support, proposal.description)
+
       //Call api update
-      updateProposalMutation.mutate(
-        { id: proposal._id, body: params },
-        {
-          onSuccess: () => {
-            setIsModalVoting(false)
-          }
-        }
-      )
+      // updateProposalMutation.mutate(
+      //   { id: proposal._id, body: params },
+      //   {
+      //     onSuccess: () => {
+      //       setIsModalVoting(false)
+      //     }
+      //   }
+      // )
     }
   })
   console.log('render Modal voting')
