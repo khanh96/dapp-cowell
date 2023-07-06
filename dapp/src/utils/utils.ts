@@ -14,7 +14,10 @@ export const formatDotAccount = (address: string): string => {
 }
 
 export const calculatePercent = (number: number, total: number) => {
-  return Math.round((number / total) * 100)
+  if (total > 0) {
+    return Math.round((number / total) * 100)
+  }
+  return 0
 }
 
 // convert string to byte

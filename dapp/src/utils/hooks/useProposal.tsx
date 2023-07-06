@@ -12,6 +12,7 @@ import {
   readState,
   writeCastVote,
   writeDelegate,
+  writeExecute,
   writePropose,
   writeQueue
 } from 'src/abi/common.abi'
@@ -82,14 +83,33 @@ export const useProposal = () => {
   })
 
   const queue = async (description: string) => {
-    const { contractToken, contractDao, wallet } = metamaskCTX
+    const { contractToken, contractDao } = metamaskCTX
     const descriptionHash = keccak256(toUtf8Bytes(description))
     console.log('data-queue', targets, VALUE, CALLDATAS, descriptionHash)
     if (contractToken && contractDao) {
       const transactionQueue = await writeQueue(contractDao, targets, VALUE, CALLDATAS, descriptionHash)
       console.log('transactionQueue', transactionQueue)
       transactionQueue.wait().then((res) => {
-        console.log('success=>', res.status)
+        console.log('Queue success=>', res.status)
+      })
+    }
+  }
+  const execute = async (description: string) => {
+    const { contractToken, contractDao } = metamaskCTX
+    const descriptionHash = keccak256(toUtf8Bytes(description))
+    console.log('data-excute', targets, VALUE, CALLDATAS, descriptionHash)
+    if (contractToken && contractDao) {
+      const transactionExecute = await writeExecute(
+        contractDao,
+        'payableAmount',
+        targets,
+        VALUE,
+        CALLDATAS,
+        descriptionHash
+      )
+      console.log('transactionQueue', transactionExecute)
+      transactionExecute.wait().then((res) => {
+        console.log('Execute success=>', res.status)
       })
     }
   }
@@ -111,7 +131,6 @@ export const useProposal = () => {
       if (res && res.status === transaction.success) {
         // success transaction proposal
         setFormDataProposal(body)
-        proposalMutation.mutate(body)
       }
     } else {
       toast.error('voting power is not enough', {
@@ -120,15 +139,17 @@ export const useProposal = () => {
     }
   }
 
-  const castVote = async (proposalId: string, support: number, description: string) => {
-    console.log('aaa', metamaskCTX.contractDao, proposalId, support)
-    if (metamaskCTX.contractDao) {
-      const transactionCastVote = await writeCastVote(metamaskCTX.contractDao, proposalId, support)
-      const castVoteRes = await transactionCastVote.wait()
-      if (castVoteRes.status === transaction.success) {
-        const descriptionHash = keccak256(toUtf8Bytes(description))
+  const castVote = async (proposalId: string, support: number) => {
+    console.log('castVote', metamaskCTX.contractDao, proposalId, support)
+    try {
+      if (metamaskCTX.contractDao) {
+        const transactionCastVote = await writeCastVote(metamaskCTX.contractDao, proposalId, support)
+        const castVoteRes = await transactionCastVote.wait()
         console.log('CAST VOTE SUCCESS ------')
+        return castVoteRes
       }
+    } catch (error) {
+      console.log('CAST VOTE ERROR=>', error)
     }
   }
 
@@ -232,6 +253,7 @@ export const useProposal = () => {
     isLoading,
     castVote,
     queue,
+    execute,
     handleState
   }
 }

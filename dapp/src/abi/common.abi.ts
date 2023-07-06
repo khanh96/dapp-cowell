@@ -1,6 +1,7 @@
-import type { ethers, Bytes } from 'ethers'
+import { type ethers, type Bytes, BigNumber } from 'ethers'
 import { formatEther, parseUnits } from 'src/utils/utils'
 import type { ContractTransaction } from 'ethers/src.ts'
+import {} from 'ethers/lib/utils'
 export interface TransactionData {
   status: number
 }
@@ -59,14 +60,17 @@ export interface AbiContractDao {
     descriptionHash: string
   ) => Promise<ContractTransaction>
   execute: (
-    payableAmount: string[],
-    targets: number[],
-    values: string[],
+    payableAmount: any,
+    targets: string[],
+    values: number[],
     calldatas: string[],
     descriptionHash: string
   ) => Promise<ContractTransaction>
   state: (proposalId: string) => Promise<number>
   proposalVotes: (proposalId: string) => Promise<{ againstVotes: number; forVotes: number; abstainVotes: number }>
+  votingDelay: () => Promise<number>
+  votingPeriod: () => Promise<number>
+  proposalThreshold: () => Promise<string>
 }
 
 export type ContractToken = AbiContractToken & ethers.Contract
@@ -226,9 +230,9 @@ export const writeCancel = async (
 
 export const writeExecute = async (
   contractDao: ContractDao,
-  payableAmount: string[],
-  targets: number[],
-  values: string[],
+  payableAmount: any,
+  targets: string[],
+  values: number[],
   calldatas: string[],
   descriptionHash: string
 ) => {
@@ -243,4 +247,18 @@ export const readState = async (contractDao: ContractDao, proposalId: string) =>
 export const readProposalVotes = async (contractDao: ContractDao, proposalId: string) => {
   const voteResult = await contractDao.proposalVotes(proposalId)
   return voteResult
+}
+
+export const readVotingDelay = async (contractDao: ContractDao) => {
+  const votingDelayResult = await contractDao.votingDelay()
+  return votingDelayResult.toNumber()
+}
+
+export const readVotingPeriod = async (contractDao: ContractDao) => {
+  const votingPeriodResult = await contractDao.votingPeriod()
+  return votingPeriodResult.toNumber()
+}
+export const readProposalThreshold = async (contractDao: ContractDao) => {
+  const proposalThresholdResult = await contractDao.proposalThreshold()
+  return formatEther(proposalThresholdResult)
 }

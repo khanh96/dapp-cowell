@@ -1,4 +1,4 @@
 const config = {
-  baseURL: 'https://ducvietphan-7041.restdb.io/rest/'
+  baseURL: 'https://vietpd-f03e.restdb.io/rest/'
 }
 export default config

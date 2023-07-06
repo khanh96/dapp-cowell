@@ -6,6 +6,7 @@ import { validVotingSchema } from 'src/utils/rules'
 import { useProposal } from 'src/utils/hooks/useProposal'
 import { Proposal } from 'src/types/proposal.type'
 import { UpdateProposalBody } from 'src/apis/proposal.api'
+import { transaction } from 'src/constants/transaction'
 
 interface ModalVotingProps {
   setIsModalVoting: (isOpen: boolean) => void
@@ -57,7 +58,7 @@ export default function ModalVoting(props: ModalVotingProps) {
     },
     resolver: yupResolver(validVotingSchema)
   })
-  const onSubmitVoting = handleSubmit((data) => {
+  const onSubmitVoting = handleSubmit(async (data) => {
     let support: VoteType = VoteType.Abstain
     // setIsModalVoting(false)
     // Call Api
@@ -81,17 +82,30 @@ export default function ModalVoting(props: ModalVotingProps) {
           support = VoteType.Abstain
           break
       }
-      castVote(proposal.proposal_id, support, proposal.description)
+      // const castVoteRes = await castVote(proposal.proposal_id, support)
+      // // update DB
+      // if (castVoteRes && castVoteRes.status === transaction.success) {
+      //   updateProposalMutation.mutate(
+      //     { id: proposal._id, body: params },
+      //     {
+      //       onSuccess: () => {
+      //         setIsModalVoting(false)
+      //       }
+      //     }
+      //   )
+      //   setIsModalVoting(false)
+      // }
 
       //Call api update
-      // updateProposalMutation.mutate(
-      //   { id: proposal._id, body: params },
-      //   {
-      //     onSuccess: () => {
-      //       setIsModalVoting(false)
-      //     }
-      //   }
-      // )
+      updateProposalMutation.mutate(
+        { id: proposal._id, body: params },
+        {
+          onSuccess: () => {
+            setIsModalVoting(false)
+          }
+        }
+      )
+      setIsModalVoting(false)
     }
   })
   console.log('render Modal voting')

@@ -4,10 +4,15 @@ import Button from 'src/components/Button'
 import { useProposal } from 'src/utils/hooks/useProposal'
 import { ValidProposalSchemaType, validProposalSchema } from 'src/utils/rules'
 import moment from 'moment'
+import { useCallback, useEffect, useState } from 'react'
+import { readProposalThreshold, readVotingDelay, readVotingPeriod } from 'src/abi/common.abi'
 
 type FormData = ValidProposalSchemaType
 
 export default function ProposalCreate() {
+  const [threshold, setThreshold] = useState('')
+  const [delay, setDelay] = useState(0)
+  const [duration, setDuration] = useState(0)
   const {
     handleSubmit,
     formState: { errors },
@@ -19,18 +24,40 @@ export default function ProposalCreate() {
     },
     resolver: yupResolver(validProposalSchema)
   })
-  const { createProposal, proposalMutation } = useProposal()
+  const { createProposal, proposalMutation, metamaskCTX } = useProposal()
 
   const onSubmitCreateProposal = handleSubmit((data) => {
     const params = {
       ...data,
-      voteFor: 80,
-      voteAgainst: 40,
+      voteFor: 0,
+      voteAgainst: 0,
       voteAbstain: 0,
       create_at: moment().format('MMM Do, YYYY')
     }
     createProposal(params)
   })
+
+  const getParameterProposal = useCallback(async () => {
+    if (metamaskCTX.contractDao) {
+      try {
+        const threshold = await readProposalThreshold(metamaskCTX.contractDao)
+        const delay = await readVotingDelay(metamaskCTX.contractDao)
+        const duration = await readVotingPeriod(metamaskCTX.contractDao)
+        console.log('threshold', threshold)
+        console.log('delay', delay)
+        console.log('duration', duration)
+        setThreshold(threshold)
+        setDelay(delay)
+        setDuration(duration)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  }, [metamaskCTX.contractDao])
+
+  useEffect(() => {
+    getParameterProposal()
+  }, [getParameterProposal])
 
   return (
     <main className='container max-w-[960px]'>
@@ -46,19 +73,19 @@ export default function ProposalCreate() {
                   <p className='mb-3 text-lg font-semibold text-[#7d33fa]'>Parameters</p>
                   <div className='mb-2 flex justify-between'>
                     <p className='text-sm font-normal'>Proposal threshold:</p>
-                    <p className='text-sm font-normal'>0</p>
+                    <p className='text-sm font-normal'>{threshold} CW</p>
                   </div>
                   <div className='mb-2 flex justify-between'>
                     <p className='text-sm font-normal'>Quorum needed:</p>
                     <p className='text-sm font-normal'>86.06M</p>
                   </div>
                   <div className='mb-2 flex justify-between'>
-                    <p className='text-sm font-normal'>Proposal delay</p>
-                    <p className='text-sm font-normal'>3 days</p>
+                    <p className='text-sm font-normal'>Proposal delay:</p>
+                    <p className='text-sm font-normal'>{delay} block</p>
                   </div>
                   <div className='mb-2 flex justify-between'>
                     <p className='text-sm font-normal'>Voting period:</p>
-                    <p className='text-sm font-normal'>14 days</p>
+                    <p className='text-sm font-normal'>{duration} block</p>
                   </div>
                 </div>
                 <div className='w-full'>

@@ -12,7 +12,7 @@ import { StateProposal, useProposal } from 'src/utils/hooks/useProposal'
 
 export default function ProposalDetail() {
   const chartComponentRef = useRef<HighchartsReact.RefObject>(null)
-  const { handleState, queue } = useProposal()
+  const { handleState, queue, execute } = useProposal()
   const [isModalVoting, setIsModalVoting] = useState(false)
   const { proposalId } = useParams()
   const { data: proposalDetail, isLoading } = useQuery({
@@ -24,9 +24,10 @@ export default function ProposalDetail() {
 
   const totalVote = useCallback(() => {
     let total = 0
-    if (proposalDetail?.data.voteFor && proposalDetail?.data.voteAgainst) {
+    if (proposalDetail?.data.voteFor || proposalDetail?.data.voteAgainst || proposalDetail?.data.voteAbstain) {
       total = proposalDetail?.data.voteFor + proposalDetail?.data.voteAgainst + proposalDetail?.data.voteAbstain
     }
+    console.log('total', total)
     return total
   }, [proposalDetail?.data.voteAgainst, proposalDetail?.data.voteFor, proposalDetail?.data.voteAbstain])
 
@@ -150,9 +151,9 @@ export default function ProposalDetail() {
           <Button
             kindButton='active'
             className='btn-primary w-fit'
-            onClick={() => queue(proposalDetail.data.description)}
+            onClick={() => execute(proposalDetail.data.description)}
           >
-            Queued
+            Execute
           </Button>
         )
       case StateProposal.Succeeded:
@@ -162,7 +163,7 @@ export default function ProposalDetail() {
             className='btn-primary w-fit'
             onClick={() => queue(proposalDetail.data.description)}
           >
-            Succeeded
+            Queue
           </Button>
         )
       default:
@@ -222,6 +223,9 @@ export default function ProposalDetail() {
                         <span className='ml-2 text-sm font-semibold text-[#25C9A1]'>For</span>
                       </div>
                       <span className='text-sm text-[#25C9A1]'>
+                        <h1 className='text-white'>
+                          {proposalDetail?.data.voteFor} - {totalVote()}
+                        </h1>
                         {calculatePercent(proposalDetail?.data.voteFor, totalVote())}%
                       </span>
                     </div>
