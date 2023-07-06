@@ -223,9 +223,6 @@ export default function ProposalDetail() {
                         <span className='ml-2 text-sm font-semibold text-[#25C9A1]'>For</span>
                       </div>
                       <span className='text-sm text-[#25C9A1]'>
-                        <h1 className='text-white'>
-                          {proposalDetail?.data.voteFor} - {totalVote()}
-                        </h1>
                         {calculatePercent(proposalDetail?.data.voteFor, totalVote())}%
                       </span>
                     </div>
