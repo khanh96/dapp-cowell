@@ -27,7 +27,6 @@ export default function ProposalDetail() {
     if (proposalDetail?.data.voteFor || proposalDetail?.data.voteAgainst || proposalDetail?.data.voteAbstain) {
       total = proposalDetail?.data.voteFor + proposalDetail?.data.voteAgainst + proposalDetail?.data.voteAbstain
     }
-    console.log('total', total)
     return total
   }, [proposalDetail?.data.voteAgainst, proposalDetail?.data.voteFor, proposalDetail?.data.voteAbstain])
 

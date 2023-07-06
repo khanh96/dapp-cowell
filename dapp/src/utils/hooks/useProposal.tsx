@@ -23,7 +23,7 @@ import { Proposal } from 'src/types/proposal.type'
 
 const VALUE = [0]
 const CALLDATAS = [
-  '0xa9059cbb000000000000000000000000755915f49ee6b7108f1a9c0f968bcae242b0c68200000000000000000000000000000000000000000000003635c9adc5dea00000'
+  '0xa9059cbb00000000000000000000000062f721175c17fe1b2a25b60abd2a395072a4453900000000000000000000000000000000000000000000003635c9adc5dea00000'
 ]
 
 export enum StateProposal {
@@ -99,14 +99,7 @@ export const useProposal = () => {
     const descriptionHash = keccak256(toUtf8Bytes(description))
     console.log('data-excute', targets, VALUE, CALLDATAS, descriptionHash)
     if (contractToken && contractDao) {
-      const transactionExecute = await writeExecute(
-        contractDao,
-        'payableAmount',
-        targets,
-        VALUE,
-        CALLDATAS,
-        descriptionHash
-      )
+      const transactionExecute = await writeExecute(contractDao, targets, VALUE, CALLDATAS, descriptionHash)
       console.log('transactionQueue', transactionExecute)
       transactionExecute.wait().then((res) => {
         console.log('Execute success=>', res.status)

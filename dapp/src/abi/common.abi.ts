@@ -60,7 +60,6 @@ export interface AbiContractDao {
     descriptionHash: string
   ) => Promise<ContractTransaction>
   execute: (
-    payableAmount: any,
     targets: string[],
     values: number[],
     calldatas: string[],
@@ -230,13 +229,12 @@ export const writeCancel = async (
 
 export const writeExecute = async (
   contractDao: ContractDao,
-  payableAmount: any,
   targets: string[],
   values: number[],
   calldatas: string[],
   descriptionHash: string
 ) => {
-  const writeExecuteResult = await contractDao.execute(payableAmount, targets, values, calldatas, descriptionHash)
+  const writeExecuteResult = await contractDao.execute(targets, values, calldatas, descriptionHash)
   return writeExecuteResult
 }
 
