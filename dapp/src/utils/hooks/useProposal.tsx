@@ -149,7 +149,6 @@ export const useProposal = () => {
   const handleState = async (proposal: Proposal, proposalId: string) => {
     try {
       const stateResult = await readState(metamaskCTX.contractDao as Contract & AbiContractDao, proposalId)
-
       if (proposal.state !== stateResult) {
         console.log('UPDATE DB----------')
         handleUpdateStateDB(proposal, stateResult)

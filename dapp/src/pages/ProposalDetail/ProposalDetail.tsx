@@ -82,6 +82,9 @@ export default function ProposalDetail() {
       console.log('NO CALL TIMEOUT ----')
       return
     }
+    if (proposalDetail?.data.state === StateProposal.Executed) {
+      handleState(proposalDetail.data, proposalDetail?.data.proposal_id)
+    }
 
     const timeoutId = setTimeout(() => {
       console.log('CALL TIMEOUT -----')
