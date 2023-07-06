@@ -82,30 +82,30 @@ export default function ModalVoting(props: ModalVotingProps) {
           support = VoteType.Abstain
           break
       }
-      // const castVoteRes = await castVote(proposal.proposal_id, support)
-      // // update DB
-      // if (castVoteRes && castVoteRes.status === transaction.success) {
-      //   updateProposalMutation.mutate(
-      //     { id: proposal._id, body: params },
-      //     {
-      //       onSuccess: () => {
-      //         setIsModalVoting(false)
-      //       }
-      //     }
-      //   )
-      //   setIsModalVoting(false)
-      // }
+      const castVoteRes = await castVote(proposal.proposal_id, support)
+      // update DB
+      if (castVoteRes && castVoteRes.status === transaction.success) {
+        updateProposalMutation.mutate(
+          { id: proposal._id, body: params },
+          {
+            onSuccess: () => {
+              setIsModalVoting(false)
+            }
+          }
+        )
+        setIsModalVoting(false)
+      }
 
       //Call api update
-      updateProposalMutation.mutate(
-        { id: proposal._id, body: params },
-        {
-          onSuccess: () => {
-            setIsModalVoting(false)
-          }
-        }
-      )
-      setIsModalVoting(false)
+      // updateProposalMutation.mutate(
+      //   { id: proposal._id, body: params },
+      //   {
+      //     onSuccess: () => {
+      //       setIsModalVoting(false)
+      //     }
+      //   }
+      // )
+      // setIsModalVoting(false)
     }
   })
   console.log('render Modal voting')
